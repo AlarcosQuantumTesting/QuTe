@@ -1,0 +1,72 @@
+
+<div class="library-layout">
+
+
+  <section>
+    <h2 class="mb-3">Library</h2>
+    <div id="projectLibrary" class="row g-3"></div>
+    <div id="pagination-controls" class="d-flex justify-content-center mt-3"></div>
+  </section>
+  <aside id="codeSidePanel" class="sidepanel d-none" aria-label="Code preview panel">
+  <div class="card shadow-sm preview-card">
+    <div class="card-body p-0">
+      <div class="preview-header d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+        <div class="fw-semibold" id="sidepanelTitle">Preview</div>
+        <div class="d-flex gap-2">
+          <button id="sidepanelCopyBtn" type="button" class="btn btn-outline-secondary btn-sm">Copy</button>
+          <button id="sidepanelClearBtn" type="button" class="btn btn-outline-secondary btn-sm">Clear</button>
+        </div>
+      </div>
+
+      <pre id="sidepanelPre" class="preview-pre m-0">(click “Circuit code” or “Testing Config”)</pre>
+    </div>
+  </div>
+</aside>
+
+</div>
+
+<template id="projectCardTemplate">
+  <div class="col-12 col-md-6">
+    <div class="card project-card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h5 class="card-title mb-1" data-field="name">Project name</h5>
+            <div class="project-meta" data-field="user">User: ...</div>
+            <div class="project-meta" data-field="cooperator">Cooperator: ...</div>
+          </div>
+
+          <button class="btn btn-outline-danger btn-icon-trash"
+                  type="button"
+                  title="Delete"
+                  data-action="delete">
+            🗑
+          </button>
+        </div>
+
+        <div class="project-meta" data-field="description">Description: ...</div>
+
+        <div class="card-actions">
+          <button class="btn btn-outline-secondary btn-sm"
+                  type="button"
+                  data-action="circuit">
+            Circuit code
+          </button>
+
+          <button class="btn btn-outline-secondary btn-sm"
+                  type="button"
+                  data-action="test">
+            Testing Config
+          </button>
+          <button class="btn btn-outline-secondary btn-sm"
+                  type="button"
+                  data-action="notes">
+            Notes
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+

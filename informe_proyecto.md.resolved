@@ -1,0 +1,360 @@
+# Informe Técnico: DeterministicTestingUI
+
+## 1. Descripción General
+
+**DeterministicTestingUI** es una herramienta web de testing de circuitos cuánticos que actúa como interfaz visual y motor de ejecución sobre un sistema de persistencia externo (backend Java/Spring). Permite a los usuarios cargar circuitos cuánticos escritos en Qiskit, definir configuraciones de test (suites de casos deterministas o estocásticos) y ejecutarlos obteniendo resultados visuales e informes de verdad/falsedad.
+
+El proyecto nació como TFG/prototipo académico y está vinculado al grupo de investigación **Alarcos** (UCLM). Se puede ejecutar en local con Uvicorn apuntando a un Spring Boot corriendo en `localhost:8080`.
+
+---
+
+## 2. Stack Tecnológico
+
+| Capa | Tecnología |
+|---|---|
+| Backend Python | **FastAPI** + **Uvicorn** |
+| Persistencia | **Java Spring Boot** (`localhost:8080`) + MySQL |
+| Motor cuántico | **Qiskit** + **Qiskit-Aer** (simulador `qasm_simulator`) |
+| Frontend | **Jinja2** templates + CSS + JS estático |
+| Auth | Cookie `SESSION_TOKEN` + JWT delegado a Spring |
+| HTTP cliente | `httpx` (async) + `requests` (sync para auth) |
+
+---
+
+## 3. Estructura de Directorios
+
+```
+DeterministicTestingUI/
+├── venv/                          # Entorno virtual Python
+└── appDeter/
+    ├── _init_.py
+    ├── Frontend/
+    │   └── presentation/
+    │       ├── templates/
+    │       │   ├── base.html      # Plantilla base Jinja2
+    │       │   ├── app.html       # SPA principal
+    │       │   └── components/    # Componentes HTML reutilizables
+    │       └── static/
+    │           ├── styles.css     # Estilos globales
+    │           ├── js/            # Scripts del frontend
+    │           ├── alarcos.png    # Logo institucional
+    │           └── favicon.ico
+    └── backend/
+        ├── app.py                 # Entry point FastAPI
+        ├── controllers/
+        │   ├── auth_controller.py
+        │   ├── project_controller.py
+        │   ├── notes_controller.py
+        │   └── helpers_controller.py
+        ├── services/
+        │   ├── auth_service.py
+        │   ├── converter.py
+        │   ├── table_services.py
+        │   ├── ProjectServices/
+        │   │   ├── Project_service.py
+        │   │   ├── ProjectServiceDeter.py
+        │   │   └── ProjectServiceStoch.py
+        │   └── quantumServices/
+        │       ├── Circuit.py
+        │       ├── CircuitDeterministic.py
+        │       ├── CircuitStochastic.py
+        │       ├── CircuitLoadError.py
+        │       └── TestCase.py
+        ├── models/
+        │   └── table_model.py
+        └── data/
+            └── database.py
+```
+
+---
+
+## 4. Arquitectura General
+
+```mermaid
+graph TD
+    Browser["🌐 Browser (Jinja2 + JS)"]
+    FastAPI["⚡ FastAPI (Python)\napp.py puerto 8000"]
+    Spring["☕ Spring Boot (Java)\npuerto 8080 + MySQL"]
+    Qiskit["🔬 Qiskit-Aer\nSimulador cuántico local"]
+
+    Browser --> FastAPI
+    FastAPI -->|"REST (httpx async)"| Spring
+    FastAPI -->|"Execución simulación"| Qiskit
+    Spring -->|"Persistencia"| MySQL[(MySQL)]
+```
+
+FastAPI actúa como **BFF (Backend-For-Frontend)**:
+- Recibe peticiones del navegador.
+- Delega la **persistencia** al backend Java Spring (proyectos, test suites, notas, usuarios).
+- Ejecuta localmente la **simulación cuántica** con Qiskit-Aer.
+- Devuelve resultados al frontend.
+
+---
+
+## 5. Punto de Entrada: [app.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/app.py)
+
+El archivo [app.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/app.py) contiene la factoría [create_app()](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/app.py#13-60) que:
+
+1. Crea la instancia de `FastAPI`.
+2. Monta la carpeta de **estáticos** en `/static`.
+3. Configura el endpoint raíz `GET /` que devuelve [app.html](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/Frontend/presentation/templates/app.html).
+4. Añade middlewares de **sesión** (`SessionMiddleware`) y **CORS** (orígenes `127.0.0.1:8000` y `127.0.0.1:4200/4201`).
+5. Incluye un **middleware de errores** global que captura `HTTPException`, `RequestValidationError` y excepciones genéricas, devolviendo JSON estructurado.
+6. Registra los routers: `auth_controller`, `project_controller` y `notes_router`.
+
+---
+
+## 6. Capa de Datos: [database.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/data/database.py)
+
+Función única [spring_request(method, path, **kwargs)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/data/database.py#8-30):
+- Construye la URL base desde la variable de entorno `SPRING_BASE_URL` (por defecto `http://127.0.0.1:8080`).
+- Usa `httpx.AsyncClient` con timeout de 30 s.
+- Propaga errores HTTP de Spring como `HTTPException`.
+- Deserializa JSON si el `Content-Type` es `application/json`, texto plano en caso contrario.
+- Convierte errores de red/timeout en `HTTP 502`.
+
+---
+
+## 7. Controladores
+
+### 7.1 [auth_controller.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/auth_controller.py) — Prefijo `/auth`
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/auth/register` | Registro de usuario (form data: [email](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/auth_service.py#80-112), `password`). Delega en `AuthService.register()`. |
+| `POST` | `/auth/login` | Login (form data). Delega en `AuthService.login()`. Almacena token en sesión y establece cookie `SESSION_TOKEN` (httpOnly). |
+
+### 7.2 [project_controller.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/project_controller.py) — Prefijo `/projects`
+
+El controlador más complejo del sistema. Gestiona el ciclo de vida completo de los proyectos.
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/projects/save_full` | Crea un proyecto completo. Recibe circuito (archivo), configuración CUT (JSON), modo y metadatos. Convierte a formato Spring y persiste via `PUT /projects/save`. |
+| `GET` | `/projects/` | Obtiene todos los proyectos de un usuario desde Spring. Los normaliza con [spring_to_projectindb()](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/helpers_controller.py#155-304). |
+| `PUT` | `/projects/{project_name}/circuit` | Actualiza el código fuente del circuito. Carga el proyecto desde Spring, modifica `qcodes[0].code` y guarda. |
+| `DELETE` | `/projects/{project_name}` | Elimina un proyecto via Spring. |
+| `POST` | `/projects/{project_name}/run_tests` | **Ejecuta los tests**. Obtiene el proyecto, determina el modo (determinístico/estocástico), ejecuta con `ProjectServiceDeter.run()` o `ProjectServiceStoch.run()` y devuelve logs + imágenes base64. |
+| `PUT` | `/projects/{project_name}/test_config` | Actualiza la configuración de test (test suite, error_range, shots, qubits). |
+| `GET` | `/projects/{project_name}/cut_config` | Devuelve la configuración CUT actual del proyecto. |
+| `GET` | `/projects/{project_name}/oi_table` | Genera la tabla de inputs/outputs del Test Configuration via `build_table()`. |
+
+### 7.3 [notes_controller.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/notes_controller.py) — Prefijo `/notes`
+
+Gestiona notas asociadas a proyectos. Actúa como proxy hacia Spring.
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/notes/` | Lista proyectos del usuario con sus notas. Hace N requests concurrentes a `/notes/list` (una por proyecto) con `asyncio.gather`. |
+| `POST` | `/notes/` | Crea una nota ([NoteCreate](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/notes_controller.py#14-20): `project_id`, [user_email](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/auth_service.py#80-112), `title`, `text`, `type`). |
+| `PUT` | `/notes/{note_id}` | Actualiza una nota existente (parcial: solo los campos no-`None`). |
+| `DELETE` | `/notes/{note_id}` | Elimina una nota. Spring acepta body en DELETE, por lo que se manda [email](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/auth_service.py#80-112) + `projectId`. |
+
+### 7.4 [helpers_controller.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/helpers_controller.py) — Módulo de utilidades (no router)
+
+Funciones auxiliares compartidas entre controladores:
+
+| Función | Descripción |
+|---|---|
+| [get_session_cookie_or_401(request)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/helpers_controller.py#12-23) | Extrae `SESSION_TOKEN` de la cookie o lanza HTTP 401. |
+| [normalize_init_tokens(tokens, n_qubits)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/helpers_controller.py#24-45) | Valida y normaliza los tokens de inicialización de qubits (`"", "0", "1", "h", "y", "z", "s", "t"`). Ajusta longitud al número de qubits. |
+| [gen_int_id()](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/helpers_controller.py#45-55) | Genera un ID entero pseudo-único a partir de UUID (evita colisiones entre int/string en Spring). |
+| [legacy_cutcfg_to_testSuites(...)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/helpers_controller.py#55-129) | Convierte el formato [cut_config](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/project_controller.py#458-485) legacy del frontend al formato `TestSuites` que espera Spring. Soporta modo determinístico y estocástico. |
+| [_derive_mode_from_testSuites(p)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/helpers_controller.py#131-154) | Deduce el modo del proyecto inspeccionando el tipo de `testCases` (`DETERMINISTIC` / `STOCHASTIC`). |
+| [spring_to_projectindb(p, fallback_email)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/helpers_controller.py#155-304) | **Normaliza** la respuesta de Spring al formato interno del frontend. Extrae `circuit_code`, modo, `test_file_content`, `error_range`, etc. Maneja diferencias entre camelCase y snake_case. |
+
+---
+
+## 8. Capa de Servicios
+
+### 8.1 [AuthService](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/auth_service.py#7-112) ([auth_service.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/auth_service.py))
+
+Comunica con el backend Java en `http://localhost:8080/users` usando `requests` síncrono.
+
+| Método | Descripción |
+|---|---|
+| [register(email, password)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/auth_controller.py#8-19) | `POST /users/create`. Lanza HTTP 400 si email ya existe (409 Spring). |
+| [login(email, password)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/auth_service.py#40-79) | `POST /users/login`. Devuelve el token JWT en texto plano. |
+| [get_user_email_from_token(token)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/auth_service.py#80-112) | `POST /users/getUser`. Extrae email de un token JWT. |
+
+### 8.2 [ProjectService](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/Project_service.py#19-191) ([Project_service.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/Project_service.py))
+
+Servicio de orquestación principal para proyectos.
+
+| Método | Descripción |
+|---|---|
+| [create(...)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/Project_service.py#25-57) | Crea el proyecto enviando archivos a Spring. |
+| [_write_circuit_file(circuit_content, path)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/Project_service.py#77-102) | Escribe el código del circuito en `/tmp/circuit.py` y lo carga como módulo Python via `Circuit.create_cut_circuit()`. |
+| [_draw_circuit_image(circuit, scale)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/Project_service.py#105-111) | Renderiza el circuito Qiskit con `circuit_drawer(output="mpl")` y devuelve PNG en base64. |
+| [_save_images(project_name, cut_b64, qtcc_b64)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/Project_service.py#112-124) | Persiste las imágenes del circuito en Spring via `PUT /projects/{id}/images`. |
+| [run_tests(project_name)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/Project_service.py#127-191) | Orquesta la ejecución completa: valida, carga circuito, detecta modo, ejecuta, renderiza y guarda imágenes. |
+
+### 8.3 [ProjectServiceDeter](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceDeter.py#7-65) ([ProjectServiceDeter.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceDeter.py))
+
+Servicio de ejecución en modo **determinístico**.
+
+| Método | Descripción |
+|---|---|
+| [_validate_tests(test_suite, inputs_list, outputs_list)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceStoch.py#9-31) | Valida que cada caso tenga el número correcto de bits de entrada y salida. |
+| [_build_qtcc_preview(CuT, ...)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceStoch.py#32-55) | Construye el circuito QTCC para la vista previa (primer caso de la suite). |
+| [run(CuT, inputs_list, outputs_list, test_suite, shots, init_values)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceDeter.py#49-65) | Ejecuta todos los casos determinísticos. Retorna `logs` (veredicto por caso) y el circuito QTCC. |
+
+### 8.4 [ProjectServiceStoch](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceStoch.py#7-76) ([ProjectServiceStoch.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceStoch.py))
+
+Servicio de ejecución en modo **estocástico**.
+
+| Método | Descripción |
+|---|---|
+| [_validate_tests(test_suite, outputs_list)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceStoch.py#9-31) | Valida que cada par [(expected_out, prob)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceDeter.py#49-65) sea correcto (probabilidad 0–1 o 0–100). |
+| [_build_qtcc_preview(CuT, ...)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceStoch.py#32-55) | Construye el QTCC estocástico para la vista previa. |
+| [run(CuT, inputs_list, outputs_list, test_suite, shots, error_range, init_values)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceDeter.py#49-65) | Ejecuta todos los casos estocásticos. Retorna `percentages` (conteo/porcentaje de hits por salida esperada) y el circuito QTCC. |
+
+---
+
+## 9. Servicios Cuánticos (`quantumServices/`)
+
+### 9.1 [Circuit.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/Circuit.py)
+
+Clase base de interacción con Qiskit.
+
+| Método | Descripción |
+|---|---|
+| [create_cut_circuit(file_path)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/Circuit.py#23-63) | Carga dinámicamente el archivo Python del circuito como módulo y llama a [create_cut_circuit()](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/Circuit.py#23-63). Captura `SyntaxError` y errores de runtime convirtiéndolos en `CircuitLoadError`. |
+| [executeQTCC(circuit, shots)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/Circuit.py#14-22) | Transpila y ejecuta el QTCC en `qasm_simulator`. Devuelve `True` si el veredicto es `'1'`. |
+| [run_counts(circuit, shots)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/Circuit.py#64-71) | Ejecuta y devuelve el diccionario de cuentas. |
+| [_prepare_qubit(circ, qreg, idx, spec)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/Circuit.py#81-125) | Prepara un qubit según el token: `0`→noop, `1`→X, `h`→H, `y`→Y, `z`→Z, `s`→S, `t`→T. |
+
+### 9.2 [CircuitDeterministic.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/CircuitDeterministic.py)
+
+| Método | Descripción |
+|---|---|
+| [generateQTCC(CuT, CuT_output_indexes, input_values, result, input_indexes)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/CircuitDeterministic.py#8-58) | Construye el QTCC determinístico. Prepara entradas, carga los valores esperados en registros auxiliares, aplica el CuT como instrucción, usa puertas Toffoli (CCX) para comparar salida con esperada y una puerta MCX como veredicto. Mide el `q_verdict`. |
+
+### 9.3 [CircuitStochastic.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/CircuitStochastic.py)
+
+| Método | Descripción |
+|---|---|
+| [generateQTCC_stochastic(CuT, CuT_output_indexes, input_values, input_indexes, expected_out)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/CircuitStochastic.py#7-42) | Construye el QTCC estocástico. Prepara entradas, aplica el CuT y mide directamente los qubits de salida. No necesita registro de veredicto porque la comparación es estadística. |
+
+### 9.4 [TestCase.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/TestCase.py)
+
+Orquestador de ejecución de casos de test.
+
+| Método | Descripción |
+|---|---|
+| [deterministic_tests(CuT, outputs, test_suite, shots, inputs)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/TestCase.py#6-14) | Para cada [(inp, expected)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceDeter.py#49-65) genera el QTCC y llama a `Circuit.executeQTCC()`. Acumula logs con formato `"Input: X → Expected: Y → Verdict: Z"`. |
+| [stochastic_tests(CuT, outputs, test_suite, shots, inputs, error_range, init_values)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/TestCase.py#16-78) | Para cada [(expected_out, expected_prob)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/ProjectServices/ProjectServiceDeter.py#49-65) ejecuta el circuito estocástico, calcula el porcentaje de hits y compara con la probabilidad esperada ± tolerancia (`error_range`). |
+| [run_test_process(...)](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/TestCase.py#80-89) | Dispatcher: llama a [deterministic_tests](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/TestCase.py#6-14) o [stochastic_tests](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/TestCase.py#16-78) según el modo. |
+
+### 9.5 [CircuitLoadError.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/CircuitLoadError.py)
+
+Excepción personalizada con campos `filename`, `lineno`, `colno`, `code_line`, `tb` para devolver al frontend información útil sobre errores de carga del circuito.
+
+---
+
+## 10. Modelos Pydantic ([models/table_model.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/models/table_model.py))
+
+| Modelo | Descripción |
+|---|---|
+| [TableRowModel](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/models/table_model.py#5-14) | Representa una fila de la tabla de configuración: `label`, `index`, `kind` (`"input"` o `"output"`). |
+| [TableConfig](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/models/table_model.py#14-44) | Configuración completa de una tabla: `num_qubits`, listas de índices `inputs`/`outputs`, cabeceras, prefijo, tokens de inicialización. Valida que los índices estén en rango y que inputs y outputs sean disjuntos. |
+| [TableResponse](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/models/table_model.py#44-49) | Respuesta estructurada de la tabla: `input_header`, `output_header`, lista de [TableRowModel](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/models/table_model.py#5-14) para inputs y outputs. |
+
+---
+
+## 11. Utilidades
+
+### [converter.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/converter.py) — Clase [Converter](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/converter.py#3-184)
+
+Convierte representaciones JSON de circuitos (formato Quirk/columnar) a código ejecutable:
+
+| Target | Método | Descripción |
+|---|---|---|
+| **Qiskit** | [generate_algorithm_qiskit()](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/converter.py#23-57) | Genera código Python Qiskit con función [create_cut_circuit()](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/quantumServices/Circuit.py#23-63). Soporta puertas H, X, Y, Z, S, T y sus versiones controladas (CX, CCX). |
+| **Q#** | [generate_qsharp_code()](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/converter.py#121-136) | Genera código Q# con `namespace QuantumCircuits`. Soporta las mismas puertas. |
+
+### [table_services.py](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/services/table_services.py) — `build_table(config: TableConfig) → TableResponse`
+
+Construye el objeto [TableResponse](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/models/table_model.py#44-49) a partir de un [TableConfig](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/models/table_model.py#14-44), asignando labels `"q{index}"` a cada qubit y clasificándolo como input u output.
+
+---
+
+## 12. Frontend
+
+El frontend es una **SPA Jinja2** servida en `GET /`.
+
+- [base.html](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/Frontend/presentation/templates/base.html): plantilla base con head, imports CSS/JS y bloque de contenido.
+- [app.html](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/Frontend/presentation/templates/app.html): renderiza la aplicación principal.
+- [static/styles.css](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/Frontend/presentation/static/styles.css): estilos globales (~12 KB).
+- `static/js/`: scripts JavaScript del cliente.
+- [static/alarcos.png](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/Frontend/presentation/static/alarcos.png), [static/usuario.png](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/Frontend/presentation/static/usuario.png): assets de imagen institucional.
+
+> [!NOTE]
+> El frontend consume la API REST del backend FastAPI mediante fetch/XHR. La autenticación viaja automáticamente por la cookie `SESSION_TOKEN` (httpOnly).
+
+---
+
+## 13. Flujo de Ejecución de Tests
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant FastAPI
+    participant Spring
+    participant Qiskit
+
+    Browser->>FastAPI: POST /projects/{name}/run_tests
+    FastAPI->>Spring: POST /projects/getProject
+    Spring-->>FastAPI: Project JSON
+    FastAPI->>FastAPI: spring_to_projectindb() → extrae circuit + test_suite
+    FastAPI->>FastAPI: _write_circuit_file() → /tmp/circuit.py
+    FastAPI->>Qiskit: Circuit.create_cut_circuit()
+    Qiskit-->>FastAPI: QuantumCircuit (CuT)
+
+    alt Modo Determinístico
+        loop Por cada (inp, expected)
+            FastAPI->>Qiskit: CircuitDeterministic.generateQTCC()
+            FastAPI->>Qiskit: Circuit.executeQTCC(shots)
+            Qiskit-->>FastAPI: verdict (True/False)
+        end
+        FastAPI-->>Browser: {logs, cut_image_base64, qtcc_image_base64}
+    else Modo Estocástico
+        loop Por cada (expected_out, expected_prob)
+            FastAPI->>Qiskit: CircuitStochastic.generateQTCC_stochastic()
+            FastAPI->>Qiskit: Circuit.run_counts(shots)
+            Qiskit-->>FastAPI: counts dict
+            FastAPI->>FastAPI: calcula % hits vs tolerancia
+        end
+        FastAPI-->>Browser: {percentages, cut_image_base64, qtcc_image_base64}
+    end
+```
+
+---
+
+## 14. Autenticación y Sesión
+
+1. El usuario envía credenciales via `POST /auth/login`.
+2. FastAPI llama a Spring Boot (`POST /users/login`) y recibe el JWT.
+3. FastAPI almacena el JWT en la **sesión del servidor** (middleware de sesión) y lo devuelve al browser en una **cookie `SESSION_TOKEN`** (httpOnly, samesite=lax).
+4. Todo endpoint posterior extrae el token con [get_session_cookie_or_401()](file:///Users/samuel/Documents/Proyectos/DeterministicTestingUI/appDeter/backend/controllers/helpers_controller.py#12-23) y lo reenvía a Spring en cada petición para validar autorización.
+
+---
+
+## 15. Resumen de Endpoints REST
+
+| Controller | Método | Ruta | Función |
+|---|---|---|---|
+| Auth | POST | `/auth/register` | Registro de usuario |
+| Auth | POST | `/auth/login` | Login, devuelve cookie SESSION_TOKEN |
+| Projects | POST | `/projects/save_full` | Crear proyecto completo |
+| Projects | GET | `/projects/` | Listar proyectos por usuario |
+| Projects | PUT | `/projects/{name}/circuit` | Actualizar código del circuito |
+| Projects | DELETE | `/projects/{name}` | Eliminar proyecto |
+| Projects | POST | `/projects/{name}/run_tests` | Ejecutar tests (det./estoc.) |
+| Projects | PUT | `/projects/{name}/test_config` | Actualizar test suite |
+| Projects | GET | `/projects/{name}/cut_config` | Obtener configuración CUT |
+| Projects | GET | `/projects/{name}/oi_table` | Obtener tabla I/O de Test Configuration |
+| Notes | GET | `/notes/` | Listar proyectos con notas |
+| Notes | POST | `/notes/` | Crear nota |
+| Notes | PUT | `/notes/{note_id}` | Actualizar nota |
+| Notes | DELETE | `/notes/{note_id}` | Eliminar nota |

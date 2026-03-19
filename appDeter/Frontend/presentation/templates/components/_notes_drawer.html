@@ -1,0 +1,49 @@
+<!-- components/_notes_drawer.html -->
+<div id="notesOverlay" class="notes-overlay" onclick="window.closeNotesDrawer()"></div>
+
+<aside id="notesDrawer" class="notes-drawer" aria-hidden="true">
+  <div class="notes-header">
+    <div class="notes-header-left">
+      <h3 style="margin:0;">Notes</h3>
+      <small class="text-muted">Proyects</small>
+    </div>
+    <div class="notes-header-right">
+      <button class="btn cancel" type="button" onclick="window.closeNotesDrawer()">Close</button>
+    </div>
+  </div>
+
+  <div class="notes-body">
+      
+
+    <div class="notes-toolbar">
+      <button class="btn primary" type="button" onclick="window.newNote()">New</button>
+    </div>
+
+   
+
+    <div class="notes-form">
+      <h4 id="noteFormTitle" style="margin: 12px 0 8px 0;">Nueva nota</h4>
+      <input id="noteId" type="hidden" />
+
+      <label>Título</label>
+      <input id="noteTitle" type="text" placeholder="Título de la nota" />
+
+      <label>Tipo</label>
+      <select id="noteType">
+        <option value="general">general</option>
+        <option value="deter">deter</option>
+        <option value="stoch">stoch</option>
+        <option value="bug">bug</option>
+        <option value="idea">idea</option>
+      </select>
+
+      <label>Text</label>
+      <textarea id="noteText" rows="6" placeholder="Escribe aquí…"></textarea>
+
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button class="btn success" type="button" onclick="window.submitNoteForm()">Save</button>
+        <button class="btn cancel" type="button" onclick="window.newNote()">Clean</button>
+      </div>
+    </div>
+  </div>
+</aside>

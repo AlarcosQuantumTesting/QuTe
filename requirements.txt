@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pydantic
+httpx
+requests
+qiskit
+qiskit-aer
+starlette
+jinja2
+python-multipart
+matplotlib
+pylatexenc
+itsdangerous

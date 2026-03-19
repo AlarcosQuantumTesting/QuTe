@@ -1,0 +1,558 @@
+/* =========================
+   Estilos Generales
+========================= */
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* evita scroll horizontal */
+}
+
+/* =========================
+   Intro
+========================= */
+#intro {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #ffffff, #e6e6e6);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 1s ease-out, visibility 1s ease-out;
+  text-align: center;
+}
+
+#intro.hidden { opacity: 0; visibility: hidden; }
+
+#intro img {
+  max-width: 200px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  animation: fadeIn 2s ease-in-out;
+}
+
+#intro h1 {
+  font-size: 3em;
+  color: #333;
+  margin-bottom: 20px;
+  animation: slideIn 2s ease-in-out;
+}
+
+#intro button {
+  padding: 15px 30px;
+  font-size: 1.2em;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  animation: bounceIn 2s ease-in-out;
+}
+
+#intro button:hover { background-color: #0056b3; transform: scale(1.05); }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes bounceIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* =========================
+   Inputs / Textareas
+========================= */
+#textareasContainer textarea,
+#cutConfigContainer textarea {
+  min-height: 300px;
+}
+
+#editCircuitButton,
+#editCutButton {
+  width: 200px;
+}
+
+/* =========================
+   Tabs
+========================= */
+.nav-tabs .nav-link {
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #555;
+  font-weight: bold;
+  transition: border-bottom-color 0.3s, color 0.3s;
+}
+
+.nav-tabs .nav-link.active {
+  border-bottom-color: #007bff;
+  color: #007bff;
+}
+
+/* =========================
+   Notificaciones
+========================= */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #28a745;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+.notification.show { opacity: 1; }
+
+/* =========================
+   LAYOUT APP: Sidebar fijo + contenido ocupa el resto
+   (ESTO es lo que te arregla lo de “se queda en un lateral feo”)
+========================= */
+:root {
+  --sb-collapsed: 60px;
+  --sb-expanded: 220px;
+
+  /* ancho máximo del contenido dentro del área restante */
+  --content-max: 1500px;
+
+  /* margen lateral dentro del área restante */
+  --gutter: clamp(12px, 2vw, 28px);
+}
+
+/* app-area solo “contiene” semánticamente; el layout real lo hace sidebar+main */
+#app-area {
+  min-height: 100vh;
+}
+
+/* Sidebar SIEMPRE pegado al borde izquierdo */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--sb-collapsed);
+  background-color: #198754;
+  transition: width 0.25s ease;
+  overflow: hidden;
+  z-index: 1000;
+  padding-top: 20px;
+}
+
+/* Hover expand SOLO en desktop; y expande SIN mover el contenido (overlay) */
+@media (hover:hover) and (pointer:fine) {
+  .sidebar:hover {
+    width: var(--sb-expanded);
+  }
+}
+
+/* Links del menú */
+.sidebar .nav-link {
+  padding: 12px 20px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.sidebar .nav-link i {
+  font-size: 18px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.sidebar .nav-link .label {
+  opacity: 0;
+  margin-left: 0;
+  transition: opacity 0.2s ease, margin-left 0.2s ease;
+}
+
+/* Mostrar texto solo cuando el sidebar está expandido (hover desktop) */
+@media (hover:hover) and (pointer:fine) {
+  .sidebar:hover .nav-link .label {
+    opacity: 1;
+    margin-left: 8px;
+  }
+}
+
+.sidebar .nav-link:hover {
+  background-color: rgba(0, 0, 0, 0.15);
+  text-decoration: none;
+}
+
+#logoutButton {
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+/* MAIN CONTENT:
+   - SIEMPRE ocupa el ancho restante (pantalla - sidebar)
+   - SIEMPRE “centrado” por dentro
+   - NO se queda arrinconado
+*/
+#main-content {
+  display: none;              /* tú lo controlas con JS */
+  margin-left: var(--sb-collapsed);
+  width: calc(100vw - var(--sb-collapsed));
+  padding: 20px;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+/* Si tu JS hace content.style.marginLeft = 220px cuando abres,
+   esta regla permite que también se adapte bien al ancho restante */
+#main-content[style*="margin-left: 220px"] {
+  width: calc(100vw - 220px);
+}
+
+/* Bloque centrado dentro del área restante (lo que tú ves como “panel blanco”) */
+.tab-content {
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-top: 20px;
+
+  /* clave: centrado y ancho fluido */
+  width: min(var(--content-max), 100%);
+  margin-left: auto;
+  margin-right: auto;
+
+  display: none;
+}
+.tab-content.active { display: block; }
+
+/* Formularios */
+.tab-content input[type="text"],
+.tab-content input[type="email"],
+.tab-content input[type="password"],
+.tab-content textarea,
+.tab-content select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0 20px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.3s;
+}
+.tab-content input[type="text"]:focus,
+.tab-content input[type="email"]:focus,
+.tab-content input[type="password"]:focus,
+.tab-content textarea:focus,
+.tab-content select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.tab-content button {
+  padding: 12px 25px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s, transform 0.2s ease;
+}
+.tab-content button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+/* =========================
+   Zonas internas
+========================= */
+#projectDetails, #executionArea {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* En pantallas medianas/grandes, ejecución en dos columnas */
+@media (min-width: 992px) {
+  #executionArea {
+    flex-direction: row;
+    gap: 30px;
+    align-items: flex-start;
+  }
+}
+
+/* Resultados */
+#executionResults {
+  flex: 1;
+  background-color: #f1f1f1;
+  padding: 5px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Select + label en línea */
+.form-group.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.form-group .form-control {
+  margin: 0;
+  flex: 1;
+}
+
+/* =========================
+   Perfil (igual que tenías)
+========================= */
+.profile-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.06);
+  padding: 18px 20px;
+}
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+.avatar-wrap {
+  position: relative;
+  display: inline-block;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 3px solid #e6f0ff;
+  background: #f3f7ff;
+  overflow: hidden;
+  cursor: pointer;
+}
+.avatar-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+.avatar-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 44px;
+  color: #4a5b8a;
+}
+.profile-heading h2 { margin: 0; font-weight: 700; }
+.profile-counters { margin-top: 4px; color: #6b7280; font-size: .95rem; }
+.profile-fields { display: grid; gap: 12px; }
+.field-row {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+.field-label { font-weight: 600; color: #374151; }
+.field-value { color: #111827; min-height: 20px; }
+.field-actions { display:flex; gap:8px; }
+
+.btn {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+.btn.primary { background:#2563eb; }
+.btn.success { background:#16a34a; }
+.btn.edit { background:#3b82f6; }
+.btn.cancel { background:#6b7280; }
+.btn.cancel:hover { filter: brightness(0.95); }
+
+.password-panel {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Snackbar */
+.snackbar {
+  visibility: hidden;
+  min-width: 220px;
+  background-color: #111827;
+  color: #fff;
+  text-align: center;
+  border-radius: 10px;
+  padding: 10px 14px;
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity .25s ease, visibility .25s ease;
+}
+.snackbar.show { visibility: visible; opacity: 1; }
+
+/* OI table */
+.oi-row-other .oi-other-cell {
+  font-size: 0.9em;
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+  color: #555;
+}
+table.oi-table {
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  width: 100% !important;
+  table-layout: fixed;
+  background: #fff;
+}
+table.oi-table th.oi-th,
+table.oi-table td.oi-td {
+  border: 1px solid #dee2e6 !important;
+  padding: 10px 6px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+table.oi-table thead th.oi-th {
+  background: #f8f9fa !important;
+  font-weight: 700 !important;
+}
+
+/* Previews */
+.preview-pre, .sidepanel-pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* =========================
+   Responsive: pantalla pequeña
+   Sidebar sigue a la izquierda (pegado), pero reducimos ancho
+========================= */
+@media (max-width: 768px) {
+  :root {
+    --sb-collapsed: 52px;     /* un poco más estrecho en móvil/tablet */
+    --content-max: 1200px;    /* no hace falta más */
+    --gutter: 10px;
+  }
+
+  #main-content {
+    margin-left: var(--sb-collapsed);
+    width: calc(100vw - var(--sb-collapsed));
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+  }
+
+  /* Evita que al hover (si el navegador lo emula) te empuje raro */
+  .sidebar:hover { width: var(--sb-collapsed); }
+}
+.notes-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.notes-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.notes-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(420px, 92vw);
+  background: #ffffff;
+  box-shadow: -8px 0 18px rgba(0,0,0,0.12);
+  z-index: 2001;
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+.notes-drawer.open { transform: translateX(0); }
+
+.notes-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.notes-body {
+  padding: 12px 16px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.notes-toolbar {
+  display: flex;
+  gap: 8px;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.note-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 10px;
+  background: #fff;
+}
+.note-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.note-title { font-weight: 700; }
+.note-meta { font-size: 0.85rem; color: #6b7280; margin-top: 2px; }
+.note-text { margin-top: 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.btn.btn-sm {
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+
+.notes-form input, .notes-form select, .notes-form textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+.notes-fab {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1800;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+  cursor: pointer;
+}
+.notes-fab:hover { filter: brightness(0.95); }

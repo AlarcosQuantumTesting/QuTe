@@ -1,0 +1,21 @@
+<h2>Converter</h2>
+<form id="converterForm" enctype="multipart/form-data">
+  <label for="jsonConfigFile">Select the configuration JSON file:</label>
+  <input type="file" id="jsonConfigFile" name="json_file" accept=".json" required>
+
+  <label for="languageSelect">Choose the target language:</label>
+  <select id="languageSelect" required>
+    <option value="" disabled selected>Select</option>
+    <option value="Qiskit">Qiskit</option>
+    <option value="QSharp">Q#</option>
+  </select>
+
+  <!-- sin onclick -->
+  <button type="button" id="convertBtn">Convert</button>
+</form>
+
+<textarea id="conversionResult" rows="15" readonly style="width: 100%; margin-top: 10px;"
+  placeholder="Converted code will appear here..."></textarea>
+
+<!-- sin onclick -->
+<button id="downloadCodeButton" style="margin-top: 10px;">Download Code</button>

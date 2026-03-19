@@ -1,0 +1,39 @@
+<aside id="sidebar" class="sidebar text-white">
+  <ul class="nav flex-column mt-4">
+    <li class="nav-item">
+      <a class="nav-link" href="#"
+        onclick="openTab('createProject'); goToCreateProject();">
+        <i class="fas fa-plus-circle me-2"></i>
+        <span class="label">Create Project</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" onclick="openTab('libro')">
+        <i class="fas fa-book me-2"></i>
+        <span class="label">Library</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" onclick="openTab('project')">
+        <i class="fas fa-play-circle me-2"></i>
+        <span class="label">Execute</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" onclick="openTab('converter')">
+        <i class="fas fa-random me-2"></i>
+        <span class="label">Converter</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+
+  <a id="logoutButton"
+    href="#"
+    class="nav-link text-white d-flex align-items-center mt-auto"
+    onclick="logout(); return false;">
+    <i class="fas fa-sign-out-alt me-2"></i>
+    <span class="label">Log out</span>
+  </a>
+</aside>

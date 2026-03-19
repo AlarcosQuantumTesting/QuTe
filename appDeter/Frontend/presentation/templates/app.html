@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}QUTE{% endblock %}
+
+{% block body %}
+  <!-- Intro + Auth -->
+  <div id="auth-area" class="container py-4">
+    {% include "components/_auth.html" %}
+  </div>
+
+  <!-- App privada -->
+  <div id="app-area" style="display:none; flex-direction:row; height:100vh;">
+    {% include "components/_sidebar.html" %}
+    <main id="main-content" class="flex-grow-1" style="display:none;">
+      <h1 class="text-center my-4">QuTe</h1>
+
+      <div id="createProject" class="tab-content">
+        {% include "components/_create_project.html" %}
+      </div>
+      <div id="libro" class="tab-content">
+        {% include "components/_library.html" %}
+      </div>
+      <div id="project" class="tab-content">
+        {% include "components/_project.html" %}
+      </div>
+      <div id="converter" class="tab-content">
+        {% include "components/_converter.html" %}
+      </div>
+      
+    </main>
+  </div>
+  {% include "components/_notes_drawer.html" %}
+
+  <div id="notification" class="notification"></div>
+{% endblock %}

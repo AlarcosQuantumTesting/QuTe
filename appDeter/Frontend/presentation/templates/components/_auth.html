@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}QUTE · Auth{% endblock %}
+
+{% block body %}
+<div id="auth-area" class="container py-4">
+  <div id="intro" class="text-center mb-4">
+    <img src="/static/alarcos.png" alt="Intro" id="introImage">
+    <h1>QuTe</h1>
+    <button onclick="startApp()">Start</button>
+  </div>
+
+  <ul class="nav nav-tabs justify-content-center mt-4" id="auth-menu-tabs">
+    {% include "components/_auth_tabs.html" %}
+  </ul>
+
+  {% include "components/_login.html" %}
+  {% include "components/_register.html" %}
+  {% include "components/_recover.html" %}
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+<section id="createProjectSection">
+  <h2>Create Project</h2>
+
+  <h3>Project Name</h3>
+  <input type="text" id="nombre_proyecto" class="form-control" placeholder="Project Name">
+
+  <h3>Collaborator(s)</h3>
+  <input type="text" id="cooperador_proyecto-createProject" class="form-control" placeholder="Project Collaborator (optional)">
+
+  <h3>Project Description</h3>
+  <textarea id="descripcion" class="form-control" placeholder="Project Description"></textarea>
+
+  <div class="mb-3">
+    <h3>Mode</h3>
+    <select id="modeSelect" class="form-control">
+      <option value="deterministic" selected>Deterministic</option>
+      <option value="stochastic">Stochastic</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <h3>Upload Circuit</h3>
+    <input type="file" id="circuitFile-createProject" name="circuit_file" class="form-control" accept=".py,.txt">
+    <small class="text-muted">Upload your CUT circuit (Python/TXT). You can edit it luego desde el editor.</small>
+  </div>
+
+  <div class="mt-3">
+    <button class="btn btn-secondary" onclick="resetCreateProjectForm()">Cancel</button>
+    <button class="btn btn-primary ms-2" onclick="createProject()">Create Project</button>
+  </div>
+</section>
+
+<section id="cutEditorSection" class="d-none">
+  <h2>Test Suite</h2>
+
+
+
+  <!-- Solo mostrar si el proyecto es stochastic -->
+  <div id="errorRangeEditRowCreate" class="mb-3 d-none">
+    <label for="errorRangeEditCreate" class="form-label">Error Range (%)</label>
+    <input type="number" id="errorRangeEditCreate" class="form-control" min="0" max="100" step="1" placeholder="5">
+  </div>
+
+  <!-- Índices e init values -->
+  <div class="row g-3 mb-3">
+    <div class="col-md-6">
+      <label for="cutInputsCreate" class="form-label">Input Indexes</label>
+      <input type="text" id="cutInputsCreate" class="form-control" placeholder="e.g. 0,1">
+    </div>
+    <div class="col-md-6">
+      <label for="cutOutputsCreate" class="form-label">Output Indexes</label>
+      <input type="text" id="cutOutputsCreate" class="form-control" placeholder="e.g. 2,3">
+    </div>
+
+    <!-- per-qubit initial values -->
+    <div class="col-12">
+      <label class="form-label">
+        Initial values for input qubits (optional)
+        <small class="text-muted d-block">
+          A selector for qubit. Allowed: 0, 1, h, y, z, s, t
+        </small>
+      </label>
+
+      <div id="cutInitValsPerQubit" class="d-grid"
+          style="grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 8px;">
+        <!-- aquí se generan los <select> por qubit -->
+      </div>
+
+      <input type="hidden" id="cutInitValsCreate" value="">
+    </div>
+  </div> <!-- ✅ cierra la row -->
+
+  <!-- Shots -->
+  <div class="mb-3">
+    <label for="cutShotsCreate" class="form-label">Shots</label>
+    <input type="number" id="cutShotsCreate" class="form-control" placeholder="1024">
+  </div>
+
+  <!-- Editor manual de casos -->
+  <div class="mb-3">
+    <label class="form-label">Test Cases</label>
+    <div id="testCasesContainerCreate"></div>
+      <button type="button" class="btn btn-outline-primary mt-2"
+          onclick="addTestCaseField(document.getElementById('testCasesContainerCreate'))">
+            + Add case
+      </button>
+  </div>
+
+  <hr class="my-4">
+  <p class="text-center my-2">— o —</p>
+
+  <!-- O subir archivo JSON para importar al formulario -->
+  <div class="mb-3">
+    <label class="form-label">Import Test Suite (JSON)</label>
+    <input type="file" id="importTestJson" accept=".json" class="form-control">
+    <small class="text-muted">Import el JSON y then “Save Test Suite”.</small>
+  </div>
+
+  <div class="mt-3">
+    <button class="btn btn-secondary" onclick="(function(){ document.querySelector('#cutEditorSection')?.classList.add('d-none'); document.querySelector('#createProjectSection')?.classList.remove('d-none'); })()">Back</button>
+    <button class="btn btn-success ms-2" onclick="saveTestSuiteFromCreate()">Save Test Suite</button>
+  </div>
+
+  <!-- Vista de solo lectura y lista de casos (tu JS ya los actualiza) -->
+  <div class="mt-3" id="cutTestCasesDisplay"></div>
+</section>

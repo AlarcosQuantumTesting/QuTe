@@ -1,0 +1,15 @@
+<div id="recoverPassword" class="tab-content" style="display:none;">
+  <h2>Recover Password</h2>
+  <input type="email" id="email_recover" placeholder="Enter your email">
+  <button onclick="recoverPassword()">Send</button>
+
+  <div id="2fa-section-recovery" style="display:none; text-align:center; margin-top:20px;">
+    <h3>Two-Factor Authentication</h3>
+    <img id="qr-img-recovery" src="" alt="Code QR" style="max-width:300px; display:none;">
+    <p>Authentication code:</p>
+    <input type="text" id="totp_code-recovery" placeholder="Code 2FA">
+    <button onclick="submit2FA()">Send Code</button>
+  </div>
+
+  <p id="recoverPasswordMessage"></p>
+</div>
