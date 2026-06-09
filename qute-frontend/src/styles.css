@@ -1,0 +1,163 @@
+/* Global Styles & Variables */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+    /* Light Mode (Default) */
+    --bg-primary: #f5f7fa;
+    --bg-secondary: #e8f5e9;
+    --bg-gradient: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-bg-hover: rgba(255, 255, 255, 0.9);
+    --glass-bg-card: rgba(255, 255, 255, 0.7);
+    --glass-bg-sidebar: rgba(255, 255, 255, 0.8);
+
+    --text-primary: #1a1f2e;
+    --text-secondary: #4a5568;
+    --text-muted: #718096;
+
+    --accent-primary: #10b981;
+    /* Emerald 500 */
+    --accent-secondary: #059669;
+    /* Emerald 600 */
+    --accent-tertiary: #34d399;
+    /* Emerald 400 */
+    --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+
+    --border-glass: rgba(16, 185, 129, 0.4);
+    --border-glass-light: rgba(16, 185, 129, 0.25);
+
+    --shadow-glass: rgba(6, 95, 70, 0.15);
+    --shadow-glass-strong: rgba(6, 95, 70, 0.25);
+
+    --card-shadow: 0 8px 32px rgba(6, 95, 70, 0.15);
+    --card-shadow-hover: 0 12px 48px rgba(6, 95, 70, 0.2);
+
+    --toggle-bg: rgba(255, 255, 255, 0.7);
+    --toggle-border: rgba(16, 185, 129, 0.3);
+}
+
+[data-theme='dark'] {
+    /* Dark Mode */
+    --bg-primary: #020617;
+    /* Slate 950 - Deeper black/blue */
+    --bg-secondary: #0f172a;
+    /* Slate 900 */
+    --bg-gradient: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+
+    --glass-bg: rgba(2, 6, 23, 0.7);
+    --glass-bg-hover: rgba(15, 23, 42, 0.8);
+    --glass-bg-card: rgba(2, 6, 23, 0.6);
+    --glass-bg-sidebar: rgba(2, 6, 23, 0.85);
+
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    --accent-primary: #34d399;
+    /* Emerald 400 for Dark Mode */
+    --accent-secondary: #10b981;
+    /* Emerald 500 */
+    --accent-tertiary: #6ee7b7;
+    /* Emerald 300 */
+    --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+
+    --border-glass: rgba(16, 185, 129, 0.3);
+    --border-glass-light: rgba(16, 185, 129, 0.15);
+
+    --shadow-glass: rgba(0, 0, 0, 0.3);
+    --shadow-glass-strong: rgba(0, 0, 0, 0.5);
+
+    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --card-shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.5);
+
+    --toggle-bg: rgba(15, 23, 42, 0.6);
+    --toggle-border: rgba(16, 185, 129, 0.3);
+}
+
+html {
+    background: var(--bg-primary);
+    min-height: 100%;
+}
+
+body {
+    background: var(--bg-gradient);
+    color: var(--text-primary);
+    transition: background 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: -0.01em;
+    background-attachment: fixed;
+}
+
+/* Glassmorphism Components */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid var(--border-glass-light);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.glass-panel:hover {
+    box-shadow: var(--card-shadow-hover);
+    border-color: var(--border-glass);
+}
+
+.glass-card {
+    background: var(--glass-bg-card);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-glass-light);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: var(--shadow-glass) 0px 4px 12px;
+}
+
+.glass-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-glass-light);
+    border-radius: 6px;
+    color: var(--text-primary);
+    padding: 8px 12px;
+    outline: none;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-input:focus {
+    border-color: var(--border-glass);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.btn-quantum {
+    background: var(--accent-gradient);
+    color: #ffffff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.btn-quantum:hover {
+    opacity: 0.9;
+}
+
+.btn-quantum:active {
+    transform: scale(0.98);
+}
+
+.btn-quantum:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.code-font {
+    font-family: 'JetBrains Mono', monospace;
+}

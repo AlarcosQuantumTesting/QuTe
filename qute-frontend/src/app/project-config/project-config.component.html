@@ -1,0 +1,288 @@
+<div class="workspace-container fade-in" *ngIf="project">
+
+  <!-- Workspace Header -->
+  <div class="workspace-header glass-panel">
+    <div class="project-info">
+      <h2 class="code-font" style="margin: 0; color: var(--accent-primary);">{{ project.name }}</h2>
+      <span class="project-id text-muted" style="font-size: 12px;">ID: {{ project.id }}</span>
+    </div>
+    <div class="project-actions">
+      <button class="btn-quantum" (click)="saveProject()" style="margin-right: 12px;">
+        <i class="fas fa-save" style="margin-right: 6px;"></i> Save
+      </button>
+      <button class="btn-quantum" (click)="deleteProject()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+        <i class="fas fa-trash" style="margin-right: 6px;"></i> Delete
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav glass-panel" style="margin-top: 16px; display: flex; padding: 6px;">
+    <button class="tab-button" [class.active]="selectedTab === 'circuit'" (click)="selectTab('circuit')">
+      <i class="fas fa-microchip"></i> Circuit & Editor
+    </button>
+    <button class="tab-button" [class.active]="selectedTab === 'test-suite'" (click)="selectTab('test-suite')">
+      <i class="fas fa-vials"></i> Test Suite
+    </button>
+    <button class="tab-button" [class.active]="selectedTab === 'results'" (click)="selectTab('results')">
+      <i class="fas fa-chart-bar"></i> Simulation Results
+    </button>
+    <button class="tab-button" [class.active]="selectedTab === 'converter'" (click)="selectTab('converter')">
+      <i class="fas fa-exchange-alt"></i> Quirk Converter
+    </button>
+  </div>
+
+  <!-- Content Sections -->
+  <div class="tab-content-container" style="margin-top: 16px;">
+
+    <!-- TAB: CIRCUIT & EDITOR -->
+    <div *ngIf="selectedTab === 'circuit'" class="glass-panel" style="padding: 24px;">
+      <h3 style="margin-top: 0;">Quantum Circuit Design (Qiskit Python)</h3>
+      
+      <div class="config-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div style="display: flex; flex-direction: column;">
+          <label style="font-size: 13px; font-weight: 500; margin-bottom: 6px;">Input Qubits (comma-separated indices):</label>
+          <input type="text" class="glass-input" [(ngModel)]="inputQubitsStr" placeholder="e.g. 0,1">
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <label style="font-size: 13px; font-weight: 500; margin-bottom: 6px;">Output Qubits (comma-separated indices):</label>
+          <input type="text" class="glass-input" [(ngModel)]="outputQubitsStr" placeholder="e.g. 0,1">
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; margin-bottom: 20px;">
+        <label style="font-size: 13px; font-weight: 500; margin-bottom: 6px;">CuT (Circuit under Test) Qiskit Code:</label>
+        <textarea class="glass-input code-font" [(ngModel)]="circuitCode" rows="12" style="resize: vertical; line-height: 1.5; background: rgba(0,0,0,0.2);"></textarea>
+      </div>
+
+      <div class="button-row" style="display: flex; gap: 12px; margin-bottom: 24px;">
+        <button class="btn-quantum" (click)="validateCircuit()" [disabled]="isValidating">
+          <i class="fas" [ngClass]="isValidating ? 'fa-spinner fa-spin' : 'fa-check-circle'"></i> Validate
+        </button>
+        <button class="btn-quantum" (click)="drawCircuit()" [disabled]="isDrawing" style="background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-tertiary) 100%);">
+          <i class="fas" [ngClass]="isDrawing ? 'fa-spinner fa-spin' : 'fa-image'"></i> Draw Circuit
+        </button>
+      </div>
+
+      <div *ngIf="validationResult" class="glass-card" style="margin-bottom: 24px;" [style.border-color]="validationResult.valid ? '#10b981' : '#ef4444'">
+        <h4 style="margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;">
+          <i class="fas" [ngClass]="validationResult.valid ? 'fa-check-circle text-success' : 'fa-exclamation-triangle text-danger'" [style.color]="validationResult.valid ? '#10b981' : '#ef4444'"></i>
+          Validation Result
+        </h4>
+        <p style="margin: 0; font-size: 14px;">
+          {{ validationResult.valid ? 'Valid circuit! Qubits detected: ' + validationResult.qubits : 'Error: ' + validationResult.error }}
+        </p>
+      </div>
+
+      <div *ngIf="cutImageBase64" class="glass-card" style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+        <h4 style="margin: 0; align-self: flex-start;">CuT Visualization</h4>
+        <img [src]="'data:image/png;base64,' + cutImageBase64" alt="Quantum Circuit" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border-glass-light); box-shadow: var(--shadow-glass-strong) 0px 4px 16px;">
+      </div>
+    </div>
+
+    <!-- TAB: TEST SUITE -->
+    <div *ngIf="selectedTab === 'test-suite'" class="glass-panel" style="padding: 24px;">
+      <h3 style="margin-top: 0;">Test Suite Configuration</h3>
+
+      <div class="config-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+        <div style="display: flex; flex-direction: column;">
+          <label style="font-size: 13px; font-weight: 500; margin-bottom: 6px;">Shots:</label>
+          <input type="number" class="glass-input" [(ngModel)]="shots">
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <label style="font-size: 13px; font-weight: 500; margin-bottom: 6px;">Tolerated Error Range (%):</label>
+          <input type="number" class="glass-input" [(ngModel)]="errorRange" step="0.5">
+        </div>
+      </div>
+
+      <div class="suite-type-selector" style="display: flex; gap: 16px; margin-bottom: 24px; padding: 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass-light);">
+        <span style="font-weight: 600; font-size: 14px; display: flex; align-items: center;">Test Suite Type:</span>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+          <input type="radio" name="testSuiteType" [(ngModel)]="testSuiteType" value="DETERMINISTIC" (change)="changeTestSuiteType('DETERMINISTIC')"> Deterministic
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+          <input type="radio" name="testSuiteType" [(ngModel)]="testSuiteType" value="STOCHASTIC" (change)="changeTestSuiteType('STOCHASTIC')"> Stochastic
+        </label>
+      </div>
+
+      <div class="test-cases-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h4 style="margin: 0;">Test Cases ({{ testCases.length }})</h4>
+          <button class="btn-quantum" (click)="addTestCase()">
+            <i class="fas fa-plus"></i> Add Case
+          </button>
+        </div>
+
+        <!-- Deterministic Cases Table -->
+        <div *ngIf="testSuiteType === 'DETERMINISTIC'" class="table-container" style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border-glass-light); color: var(--text-secondary);">
+                <th style="padding: 12px 8px;">#</th>
+                <th style="padding: 12px 8px;">Qubits Input (bits e.g. 0,1)</th>
+                <th style="padding: 12px 8px;">Expected Output (bits e.g. 0,1)</th>
+                <th style="padding: 12px 8px; text-align: center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let tc of testCases; let i = index" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                <td style="padding: 12px 8px;">{{ i + 1 }}</td>
+                <td style="padding: 12px 8px;">
+                  <input type="text" class="glass-input code-font" [(ngModel)]="tc.input" style="width: 80%;">
+                </td>
+                <td style="padding: 12px 8px;">
+                  <input type="text" class="glass-input code-font" [(ngModel)]="tc.expected" style="width: 80%;">
+                </td>
+                <td style="padding: 12px 8px; text-align: center;">
+                  <button class="btn-quantum" (click)="removeTestCase(i)" style="background: #ef4444; padding: 4px 8px;">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Stochastic Cases Table -->
+        <div *ngIf="testSuiteType === 'STOCHASTIC'" class="table-container" style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border-glass-light); color: var(--text-secondary);">
+                <th style="padding: 12px 8px;">#</th>
+                <th style="padding: 12px 8px;">Expected Probability Distribution</th>
+                <th style="padding: 12px 8px; font-size: 12px; color: var(--text-muted);">Format: [output_bits]:% (e.g. "[0,0]:50;[1,1]:50")</th>
+                <th style="padding: 12px 8px; text-align: center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let tc of testCases; let i = index" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                <td style="padding: 12px 8px;">{{ i + 1 }}</td>
+                <td colspan="2" style="padding: 12px 8px;">
+                  <input type="text" class="glass-input code-font" [(ngModel)]="tc.probDistributionStr" style="width: 90%;">
+                </td>
+                <td style="padding: 12px 8px; text-align: center;">
+                  <button class="btn-quantum" (click)="removeTestCase(i)" style="background: #ef4444; padding: 4px 8px;">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="testCases.length === 0" style="text-align: center; padding: 40px; color: var(--text-muted);">
+          <i class="fas fa-info-circle fa-2x" style="margin-bottom: 8px; display: block;"></i>
+          No test cases defined. Click "Add Case" to start.
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: RESULTS -->
+    <div *ngIf="selectedTab === 'results'" class="glass-panel" style="padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h3 style="margin: 0;">Simulation Results</h3>
+        <button class="btn-quantum" (click)="runTests()" [disabled]="isRunningTests" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+          <i class="fas" [ngClass]="isRunningTests ? 'fa-spinner fa-spin' : 'fa-play'"></i> Run Tests
+        </button>
+      </div>
+
+      <div *ngIf="!testRunSuccess && !isRunningTests" style="text-align: center; padding: 60px; color: var(--text-muted);">
+        <i class="fas fa-play-circle fa-3x" style="margin-bottom: 12px; display: block; color: var(--accent-primary);"></i>
+        Click "Run Tests" to simulate the circuit and analyze quantum behavior.
+      </div>
+
+      <div *ngIf="testRunSuccess" class="results-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- Left column: logs or tables -->
+        <div class="glass-card">
+          <h4 style="margin-top: 0; border-bottom: 1px solid var(--border-glass-light); padding-bottom: 8px;">Metrics & Details</h4>
+          
+          <!-- Deterministic Logs -->
+          <div *ngIf="testSuiteType === 'DETERMINISTIC'">
+            <ul style="list-style-type: none; padding: 0; margin: 0;">
+              <li *ngFor="let log of deterministicLogs" style="padding: 8px 12px; margin-bottom: 8px; border-radius: 6px; background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; font-family: monospace; font-size: 13px;">
+                {{ log }}
+              </li>
+            </ul>
+          </div>
+
+          <!-- Stochastic Percentages -->
+          <div *ngIf="testSuiteType === 'STOCHASTIC'">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border-glass-light); text-align: left;">
+                  <th style="padding: 8px;">Output (Bits)</th>
+                  <th style="padding: 8px;">Hits</th>
+                  <th style="padding: 8px;">Frequency (%)</th>
+                  <th style="padding: 8px;">Expected (%)</th>
+                  <th style="padding: 8px; text-align: center;">Verdict</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let res of stochasticResults" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                  <td style="padding: 8px;" class="code-font">{{ res.output.join(',') }}</td>
+                  <td style="padding: 8px;">{{ res.counts }}</td>
+                  <td style="padding: 8px;">{{ res.percent }}%</td>
+                  <td style="padding: 8px;">{{ res.expected_percent }}%</td>
+                  <td style="padding: 8px; text-align: center;">
+                    <span [style.background-color]="res.ok ? '#10b981' : '#ef4444'" style="color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">
+                      {{ res.ok ? 'OK' : 'FAIL' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right column: QTCC drawings -->
+        <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px; align-items: center;">
+          <h4 style="margin: 0; align-self: flex-start; border-bottom: 1px solid var(--border-glass-light); padding-bottom: 8px; width: 100%;">Circuits Generated by QTCC</h4>
+          <div *ngIf="qtccImageBase64" style="width: 100%; text-align: center;">
+            <span style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 6px;">Quantum Test Circuit (QTCC)</span>
+            <img [src]="'data:image/png;base64,' + qtccImageBase64" alt="QTCC Circuit" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border-glass-light);">
+          </div>
+          <div *ngIf="cutImageBase64" style="width: 100%; text-align: center;">
+            <span style="font-size: 12px; font-weight: 500; display: block; margin-bottom: 6px;">Circuit under Test (CuT)</span>
+            <img [src]="'data:image/png;base64,' + cutImageBase64" alt="CuT Circuit" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border-glass-light);">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CONVERTER -->
+    <div *ngIf="selectedTab === 'converter'" class="glass-panel" style="padding: 24px;">
+      <h3 style="margin-top: 0;">Convert Quirk Circuit to Code</h3>
+      
+      <div style="display: flex; flex-direction: column; margin-bottom: 20px;">
+        <label style="font-size: 13px; font-weight: 500; margin-bottom: 6px;">Quirk Circuit JSON:</label>
+        <textarea class="glass-input code-font" [(ngModel)]="quirkJsonInput" rows="6" placeholder='e.g. {"cols": [["H", "•"], [1, "X"]]}'></textarea>
+      </div>
+
+      <div style="display: gap: 20px; align-items: center; margin-bottom: 20px; padding: 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass-light);">
+        <span style="font-weight: 600; font-size: 14px; margin-right: 12px;">Target Language:</span>
+        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin-right: 16px;">
+          <input type="radio" name="convLanguage" [(ngModel)]="converterLanguage" value="qiskit"> Qiskit (Python)
+        </label>
+        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+          <input type="radio" name="convLanguage" [(ngModel)]="converterLanguage" value="qsharp"> Q# (Microsoft)
+        </label>
+      </div>
+
+      <button class="btn-quantum" (click)="convertCircuit()" [disabled]="isConverting" style="margin-bottom: 24px;">
+        <i class="fas" [ngClass]="isConverting ? 'fa-spinner fa-spin' : 'fa-exchange-alt'"></i> Convert Circuit
+      </button>
+
+      <div *ngIf="convertedCodeOutput" class="glass-card" style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h4 style="margin: 0;">Generated Code</h4>
+          <button class="btn-quantum" (click)="pasteConvertedCode()" style="background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%); padding: 4px 12px; font-size: 12px;">
+            <i class="fas fa-paste"></i> Use Code in Editor
+          </button>
+        </div>
+        <textarea class="glass-input code-font" [(ngModel)]="convertedCodeOutput" readonly rows="10" style="background: rgba(0,0,0,0.3); font-size: 13px; line-height: 1.4; color: var(--accent-primary);"></textarea>
+      </div>
+    </div>
+
+  </div>
+
+</div>

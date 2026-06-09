@@ -1,0 +1,77 @@
+<!-- Home Component - Glassmorphism -->
+<div class="home-container">
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-icon" style="color: var(--accent-primary);">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Checkmark representing Test/Verify -->
+                    <path d="M8 12L11 15L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    
+                    <!-- Outer dashed orbit (from QuMu style) -->
+                    <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.4" />
+                    
+                    <!-- Corner particles (from QuMu style) -->
+                    <circle cx="5" cy="5" r="1.5" fill="currentColor" />
+                    <circle cx="19" cy="5" r="1.5" fill="currentColor" />
+                    <circle cx="5" cy="19" r="1.5" fill="currentColor" />
+                    <circle cx="19" cy="19" r="1.5" fill="currentColor" />
+                </svg>
+            </div>
+            <h1 class="hero-title">QuTe: Quantum Testing</h1>
+            <p class="hero-subtitle">Execution and testing environment for quantum circuits</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-grid">
+
+        <!-- Info Card -->
+        <div class="glass-card info-card">
+            <div class="card-header">
+                <svg class="card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                    <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <h2 class="card-title">About QuTe</h2>
+            </div>
+            <p class="card-text">
+                QuTe (Quantum Testing Environment) provides a comprehensive framework to design, simulate, and verify quantum circuits.
+                It enables the creation of both deterministic and stochastic test suites,
+                ensuring that the behavior of quantum circuits aligns with the expected specifications
+                under realistic simulations.
+            </p>
+        </div>
+
+        <!-- Image Card -->
+        <div class="glass-card image-card">
+            <div class="image-wrapper" style="display: flex; justify-content: center; align-items: center; height: 100%; color: var(--accent-primary);">
+                <i class="fas fa-vial fa-10x" style="opacity: 0.8; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.4));"></i>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Action Button -->
+    <div class="action-section">
+        <button class="start-button" (click)="createCircuit()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor"
+                    stroke-width="2" />
+                <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            <span>START CREATING</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Floating Particles -->
+    <div class="particle particle-1"></div>
+    <div class="particle particle-2"></div>
+    <div class="particle particle-3"></div>
+
+</div>

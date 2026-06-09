@@ -1,0 +1,48 @@
+<div class="app-layout">
+  <app-side-bar></app-side-bar>
+  <div class="main-content" [class.sidebar-open]="manager.sidebarExpanded">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+
+<!-- Global Confirmation Modal -->
+<app-confirmation-modal 
+  [isOpen]="manager.modalState.isOpen" 
+  [title]="manager.modalState.title"
+  [message]="manager.modalState.message" 
+  [confirmText]="manager.modalState.confirmText"
+  [cancelText]="manager.modalState.cancelText" 
+  [type]="manager.modalState.type" 
+  (confirm)="manager.confirmModal()"
+  (cancel)="manager.cancelModal()">
+</app-confirmation-modal>
+
+<!-- Execution Status Notification -->
+<div class="execution-notification" *ngIf="manager.notification.visible">
+  <div class="notification-glass">
+    <div class="notification-content">
+      <!-- Loading Spinner -->
+      <svg *ngIf="manager.notification.type === 'loading'" class="spinner-icon" viewBox="0 0 24 24" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="32"
+          stroke-dashoffset="32" stroke-linecap="round" />
+      </svg>
+
+      <!-- Success Tick -->
+      <svg *ngIf="manager.notification.type === 'success'" class="success-icon" viewBox="0 0 24 24" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+
+      <!-- Error Icon -->
+      <svg *ngIf="manager.notification.type === 'error'" class="error-icon" viewBox="0 0 24 24" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" />
+        <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+      </svg>
+
+      <span>{{ manager.notification.message }}</span>
+    </div>
+  </div>
+</div>

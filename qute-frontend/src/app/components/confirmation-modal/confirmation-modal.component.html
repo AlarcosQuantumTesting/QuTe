@@ -1,0 +1,18 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="onCancel()">
+    <div class="glass-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3 class="modal-title">{{ title }}</h3>
+            <button class="close-btn" (click)="onCancel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>{{ message }}</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" (click)="onCancel()">{{ cancelText }}</button>
+            <button class="btn-confirm" [class.btn-danger]="type === 'danger'" (click)="onConfirm()">{{ confirmText
+                }}</button>
+        </div>
+    </div>
+</div>
