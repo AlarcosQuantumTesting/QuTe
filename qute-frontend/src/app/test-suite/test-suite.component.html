@@ -1,0 +1,287 @@
+<div class="suite-container fade-in" *ngIf="project">
+
+  <!-- Suite Header -->
+  <div class="suite-header glass-panel">
+    <div class="suite-title">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="color: var(--accent-primary);">
+        <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <h2 style="margin:0; font-size:1.25rem;">Test Suite</h2>
+        <span class="text-muted" style="font-size:12px;">{{ project.name }}</span>
+      </div>
+    </div>
+    <div class="suite-actions">
+      <!-- Section Toggle -->
+      <div class="section-toggle">
+        <button class="toggle-btn" [class.active]="activeSection === 'config'" (click)="activeSection = 'config'">
+          <i class="fas fa-sliders-h"></i> Configure
+        </button>
+        <button class="toggle-btn" [class.active]="activeSection === 'results'" (click)="activeSection = 'results'"
+                [disabled]="!testRunSuccess">
+          <i class="fas fa-chart-bar"></i> Results
+          <span *ngIf="testRunSuccess" class="results-dot"></span>
+        </button>
+      </div>
+      <!-- Run Tests -->
+      <button class="btn-run" (click)="runTests()" [disabled]="isRunningTests || isConverting">
+        <i class="fas" [ngClass]="isRunningTests ? 'fa-spinner fa-spin' : 'fa-play'"></i>
+        {{ isRunningTests ? 'Running...' : 'Run Tests' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- CONFIG SECTION -->
+  <div *ngIf="activeSection === 'config'" class="section-content">
+
+    <!-- Config Row: Type, Shots, Error -->
+    <div class="glass-panel config-panel">
+      <div class="config-grid">
+
+        <!-- Suite Type -->
+        <div class="config-field">
+          <label class="field-label">
+            <i class="fas fa-sliders-h" style="color: var(--accent-primary);"></i> Test Suite Type
+          </label>
+          <div class="custom-radio-group">
+            <label class="custom-radio">
+              <input type="radio" name="testSuiteType" value="DETERMINISTIC" [(ngModel)]="testSuiteType"
+                     (change)="changeTestSuiteType('DETERMINISTIC')">
+              <span class="radio-indicator"></span>
+              <i class="fas fa-bullseye"></i> Deterministic
+            </label>
+            <label class="custom-radio">
+              <input type="radio" name="testSuiteType" value="STOCHASTIC" [(ngModel)]="testSuiteType"
+                     (change)="changeTestSuiteType('STOCHASTIC')">
+              <span class="radio-indicator"></span>
+              <i class="fas fa-chart-bar"></i> Stochastic
+            </label>
+          </div>
+        </div>
+
+        <!-- Shots -->
+        <div class="config-field">
+          <label class="field-label">
+            <i class="fas fa-redo-alt" style="color: var(--accent-primary);"></i> Shots
+          </label>
+          <div class="input-with-icon">
+            <i class="fas fa-bolt input-icon"></i>
+            <input type="number" class="glass-input" [(ngModel)]="shots" (change)="onShotsChange()" style="padding-left: 36px;">
+          </div>
+        </div>
+
+        <!-- Error Range -->
+        <div class="config-field">
+          <label class="field-label">
+            <i class="fas fa-exclamation-triangle" style="color: var(--accent-primary);"></i> Tolerated Error (%)
+          </label>
+          <div class="input-with-icon">
+            <i class="fas fa-percent input-icon"></i>
+            <input type="number" class="glass-input" [(ngModel)]="errorRange" step="0.5" (change)="onErrorRangeChange()"
+                   style="padding-left: 36px;">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Test Cases -->
+    <div class="glass-panel" style="padding: 24px;">
+      <div class="test-cases-header">
+        <h4 style="margin:0;">Test Cases <span class="badge-count">{{ testCases.length }}</span></h4>
+        <button class="btn-quantum" (click)="addTestCase()">
+          <i class="fas fa-plus"></i> Add Case
+        </button>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="testCases.length === 0" class="empty-cases">
+        <i class="fas fa-vials fa-2x"></i>
+        <p>No test cases defined. Click "Add Case" to start.</p>
+      </div>
+
+      <!-- Deterministic Table -->
+      <div *ngIf="testSuiteType === 'DETERMINISTIC' && testCases.length > 0" class="table-container" style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border-glass-light); color: var(--text-secondary);">
+              <th style="padding:8px 4px; width:40px; text-align:center; font-size:14px;">#</th>
+              <th *ngFor="let idx of inputQubitsIndicesList"
+                  style="padding:8px 4px; text-align:center; font-size:14px; color:#10b981;">q{{ idx }}</th>
+              <th *ngFor="let idx of outputQubitsIndicesList"
+                  style="padding:8px 4px; text-align:center; font-size:14px; color:#BA5011;">q{{ idx }}</th>
+              <th style="padding:8px 4px; text-align:center; width:80px; font-size:14px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tc of testCases; let i = index">
+              <td style="padding:8px 4px; text-align:center; font-weight:700; font-size:16px;">{{ i + 1 }}</td>
+              <td *ngFor="let bit of getBitsArray(tc.input, getInputQubitsCount()); let idx = index"
+                  style="padding:4px; text-align:center;">
+                <button class="bit-badge input-bit" [class.bit-one]="bit === 1"
+                        [title]="'Input Qubit q' + inputQubitsIndicesList[idx]"
+                        (click)="toggleBit(tc, 'input', idx)">{{ bit }}</button>
+              </td>
+              <td *ngFor="let bit of getBitsArray(tc.expected, getOutputQubitsCount()); let idx = index"
+                  style="padding:4px; text-align:center;">
+                <button class="bit-badge output-bit" [class.bit-one]="bit === 1"
+                        [title]="'Output Qubit q' + outputQubitsIndicesList[idx]"
+                        (click)="toggleBit(tc, 'expected', idx)">{{ bit }}</button>
+              </td>
+              <td style="padding:8px 4px; text-align:center;">
+                <button class="btn-remove" (click)="removeTestCase(i)" title="Remove test case">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Stochastic Table -->
+      <div *ngIf="testSuiteType === 'STOCHASTIC' && testCases.length > 0" class="table-container" style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border-glass-light); color: var(--text-secondary);">
+              <th style="padding:8px 4px; width:40px; text-align:center; font-size:14px;">#</th>
+              <th *ngFor="let idx of outputQubitsIndicesList"
+                  style="padding:8px 4px; text-align:center; font-size:14px; color:#BA5011;">q{{ idx }}</th>
+              <th style="padding:8px 4px; text-align:center; width:180px; font-size:14px;">Expected Probability</th>
+              <th style="padding:8px 4px; text-align:center; width:80px; font-size:14px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tc of testCases; let i = index">
+              <td style="padding:8px 4px; text-align:center; font-weight:700; font-size:16px;">{{ i + 1 }}</td>
+              <td *ngFor="let bit of getBitsArray(tc.expected, getOutputQubitsCount()); let idx = index"
+                  style="padding:4px; text-align:center;">
+                <button class="bit-badge output-bit" [class.bit-one]="bit === 1"
+                        [title]="'Output Qubit q' + outputQubitsIndicesList[idx]"
+                        (click)="toggleBit(tc, 'expected', idx)">{{ bit }}</button>
+              </td>
+              <td style="padding:4px; text-align:center;">
+                <div style="display:inline-flex; align-items:center; gap:8px;">
+                  <input type="number" class="glass-input"
+                         [(ngModel)]="tc.probability"
+                         min="0" max="100" step="0.1"
+                         style="width:120px; text-align:center; font-weight:700; font-size:15px; padding:4px 8px;">
+                  <span style="font-weight:600;">%</span>
+                </div>
+              </td>
+              <td style="padding:8px 4px; text-align:center;">
+                <button class="btn-remove" (click)="removeTestCase(i)" title="Remove test case">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Probability Check -->
+        <div class="prob-check" [class.prob-ok]="getStochasticTotalProbability() === 100"
+             [class.prob-warn]="getStochasticTotalProbability() !== 100">
+          <span>Total Probability: <strong>{{ getStochasticTotalProbability() }}%</strong></span>
+          <span *ngIf="getStochasticTotalProbability() !== 100">
+            <i class="fas fa-exclamation-triangle"></i> Must sum to 100%
+          </span>
+          <span *ngIf="getStochasticTotalProbability() === 100">
+            <i class="fas fa-check-circle"></i> Ready for simulation
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RESULTS SECTION -->
+  <div *ngIf="activeSection === 'results'" class="section-content">
+
+    <div *ngIf="!testRunSuccess" class="no-results glass-panel">
+      <i class="fas fa-play-circle fa-3x" style="color: var(--accent-primary);"></i>
+      <p>Run the tests to see simulation results.</p>
+      <button class="btn-run" (click)="runTests()" [disabled]="isRunningTests">
+        <i class="fas" [ngClass]="isRunningTests ? 'fa-spinner fa-spin' : 'fa-play'"></i>
+        Run Tests
+      </button>
+    </div>
+
+    <div *ngIf="testRunSuccess" class="results-grid">
+
+      <!-- Left: Logs / Stochastic Table -->
+      <div class="glass-card">
+        <h4 style="margin-top:0; border-bottom:1px solid var(--border-glass-light); padding-bottom:8px;">
+          Metrics & Details
+        </h4>
+
+        <!-- Deterministic Logs -->
+        <div *ngIf="testSuiteType === 'DETERMINISTIC'">
+          <ul style="list-style:none; padding:0; margin:0;">
+            <li *ngFor="let log of deterministicLogs"
+                style="padding:8px 12px; margin-bottom:8px; border-radius:6px; background:rgba(16,185,129,0.1);
+                       border-left:4px solid #10b981; font-family:monospace; font-size:13px;">
+              {{ log }}
+            </li>
+          </ul>
+        </div>
+
+        <!-- Stochastic Table -->
+        <div *ngIf="testSuiteType === 'STOCHASTIC'">
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border-glass-light); text-align:left;">
+                <th style="padding:8px;">Output (Bits)</th>
+                <th style="padding:8px;">Hits</th>
+                <th style="padding:8px;">Frequency (%)</th>
+                <th style="padding:8px;">Expected (%)</th>
+                <th style="padding:8px; text-align:center;">Verdict</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let res of stochasticResults"
+                  style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                <td style="padding:8px;" class="code-font">{{ res.output.join(',') }}</td>
+                <td style="padding:8px;">{{ res.counts }}</td>
+                <td style="padding:8px;">{{ res.percent }}%</td>
+                <td style="padding:8px;">{{ res.expected_percent }}%</td>
+                <td style="padding:8px; text-align:center;">
+                  <span [style.background-color]="res.ok ? '#10b981' : '#ef4444'"
+                        style="color:white; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:600;">
+                    {{ res.ok ? 'OK' : 'FAIL' }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right: QTCC Images -->
+      <div class="glass-card" style="display:flex; flex-direction:column; gap:16px; align-items:center;">
+        <h4 style="margin:0; align-self:flex-start; border-bottom:1px solid var(--border-glass-light);
+                   padding-bottom:8px; width:100%;">Circuits Generated by QTCC</h4>
+        <div *ngIf="qtccImageBase64" style="width:100%; text-align:center;">
+          <span style="font-size:12px; font-weight:500; display:block; margin-bottom:6px;">Quantum Test Circuit (QTCC)</span>
+          <img [src]="'data:image/png;base64,' + qtccImageBase64" alt="QTCC Circuit"
+               style="max-width:100%; border-radius:8px; border:1px solid var(--border-glass-light);">
+        </div>
+        <div *ngIf="cutImageBase64" style="width:100%; text-align:center;">
+          <span style="font-size:12px; font-weight:500; display:block; margin-bottom:6px;">Circuit under Test (CuT)</span>
+          <img [src]="'data:image/png;base64,' + cutImageBase64" alt="CuT Circuit"
+               style="max-width:100%; border-radius:8px; border:1px solid var(--border-glass-light);">
+        </div>
+        <div *ngIf="!qtccImageBase64 && !cutImageBase64" class="text-muted" style="text-align:center; padding:20px;">
+          <i class="fas fa-image fa-2x" style="margin-bottom:8px; display:block; opacity:0.4;"></i>
+          No circuit images available.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Loading state -->
+<div *ngIf="!project" class="suite-loading">
+  <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--accent-primary);"></i>
+  <p>Loading project...</p>
+</div>

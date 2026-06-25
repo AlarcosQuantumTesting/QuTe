@@ -10,6 +10,8 @@ import { HomeComponent } from './home/home.component';
 import { SideBarComponent } from './side-bar/side-bar.component';
 import { ProjectConfigComponent } from './project-config/project-config.component';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
+import { TestSuiteComponent } from './test-suite/test-suite.component';
+import { SaveButtonComponent } from './save-button/save-button.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +19,9 @@ import { ConfirmationModalComponent } from './components/confirmation-modal/conf
     HomeComponent,
     SideBarComponent,
     ProjectConfigComponent,
-    ConfirmationModalComponent
+    ConfirmationModalComponent,
+    TestSuiteComponent,
+    SaveButtonComponent
   ],
   imports: [
     BrowserModule,

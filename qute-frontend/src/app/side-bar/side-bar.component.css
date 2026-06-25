@@ -1,5 +1,4 @@
 /* Sidebar Component - Glassmorphism Refined */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 .sidebar {
   position: fixed;
@@ -832,4 +831,34 @@
   background: rgba(59, 130, 246, 0.2);
   color: #3b82f6;
   opacity: 1;
+}
+
+/* === Suite Tree Node === */
+.suite-item {
+  margin: 0;
+}
+
+.suite-node {
+  padding-left: 0.5rem;
+}
+
+.suite-icon {
+  color: #a78bfa; /* soft purple for vials */
+}
+
+.suite-item .tree-node:hover .suite-icon {
+  color: #c4b5fd;
+  transform: scale(1.15);
+}
+
+.suite-item .tree-node.selected {
+  background: rgba(167, 139, 250, 0.15);
+  border-left: 3px solid #a78bfa;
+  padding-left: calc(0.5rem - 3px);
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.2);
+}
+
+.suite-item .tree-node.selected .node-label {
+  color: #c4b5fd;
+  font-weight: 600;
 }

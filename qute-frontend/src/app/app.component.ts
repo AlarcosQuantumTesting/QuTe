@@ -9,7 +9,7 @@ import { ManagerService } from './services/manager.service';
 export class AppComponent {
   title = 'qute-frontend';
   public static error = '';
-  public static quirkUrl = 'https://quirk.quantum';
+  public static quirkUrl = 'https://alarcosj.esi.uclm.es/quirk/';
 
   constructor(public manager: ManagerService) {}
 }

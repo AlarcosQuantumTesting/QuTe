@@ -1,0 +1,24 @@
+<button
+  *ngIf="shouldShow"
+  class="fab-save"
+  [class.has-changes]="hasUnsavedChanges"
+  [class.saving]="isSaving"
+  [disabled]="isSaving"
+  (click)="saveProject()"
+  title="{{ hasUnsavedChanges ? 'Unsaved changes — click to save' : 'Project saved' }}"
+  aria-label="Save project">
+
+  <!-- Unsaved pulse ring -->
+  <span *ngIf="hasUnsavedChanges && !isSaving" class="pulse-ring"></span>
+
+  <!-- Icon -->
+  <i class="fas" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+
+  <!-- Label -->
+  <span class="fab-label">
+    {{ isSaving ? 'Saving...' : (hasUnsavedChanges ? 'Save' : 'Saved') }}
+  </span>
+
+  <!-- Status dot -->
+  <span class="status-dot" [class.unsaved]="hasUnsavedChanges && !isSaving" [class.saved]="!hasUnsavedChanges && !isSaving"></span>
+</button>

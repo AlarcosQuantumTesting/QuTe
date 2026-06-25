@@ -1,2 +1,3 @@
 qute_venv/
 .DS_Store
+qute-backend/target/*

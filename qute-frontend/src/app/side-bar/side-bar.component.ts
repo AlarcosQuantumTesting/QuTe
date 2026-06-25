@@ -3,6 +3,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ManagerService } from '../services/manager.service';
 import { Project } from '../model/Project';
+import { TestSuite } from '../model/TestSuite';
 import { UserService } from '../services/user.service';
 import { ThemeService } from '../services/theme.service';
 import { environment } from '../../environments/environment';
@@ -19,6 +20,9 @@ export class SideBarComponent implements OnInit, OnDestroy {
   loading = false;
   isCreatingProject = false;
   userMenuOpen = false;
+
+  /** Set of project IDs that are expanded in the tree */
+  expandedProjects: Set<string> = new Set();
 
   private subs = new Subscription();
 
@@ -50,10 +54,67 @@ export class SideBarComponent implements OnInit, OnDestroy {
         this.loadCircuitsFromService();
       })
     );
+
+    // Auto-expand selected project when it changes
+    this.subs.add(
+      this.manager.selectedProject$.subscribe(project => {
+        if (project && project.id) {
+          this.expandedProjects.add(project.id);
+        }
+      })
+    );
   }
 
   get circuits(): Project[] {
     return this.manager.projects;
+  }
+
+  // ---- Tree expand/collapse ----
+  toggleProject(projectId: string): void {
+    if (this.expandedProjects.has(projectId)) {
+      this.expandedProjects.delete(projectId);
+    } else {
+      this.expandedProjects.add(projectId);
+    }
+  }
+
+  isProjectExpanded(projectId: string): boolean {
+    return this.expandedProjects.has(projectId);
+  }
+
+  // ---- Test Suites ----
+  getTestSuites(project: Project): TestSuite[] {
+    return project.testSuites && project.testSuites.length > 0 ? project.testSuites : [];
+  }
+
+  // ---- Navigation ----
+  selectProject(circuit: Project): void {
+    this.manager.setselectedProject(circuit);
+    this.router.navigate(['/project', circuit.id]);
+  }
+
+  selectTestSuite(circuit: Project, suiteIndex: number): void {
+    this.manager.setselectedProject(circuit);
+    this.router.navigate(['/project', circuit.id, 'suite', suiteIndex]);
+  }
+
+  // ---- Route active checks ----
+  isProjectRouteSelected(circuit: Project): boolean {
+    return this.router.isActive(`/project/${circuit.id}`, {
+      paths: 'exact',
+      queryParams: 'ignored',
+      fragment: 'ignored',
+      matrixParams: 'ignored'
+    });
+  }
+
+  isSuiteRouteSelected(circuit: Project, suiteIndex: number): boolean {
+    return this.router.isActive(`/project/${circuit.id}/suite/${suiteIndex}`, {
+      paths: 'exact',
+      queryParams: 'ignored',
+      fragment: 'ignored',
+      matrixParams: 'ignored'
+    });
   }
 
   toggleMenu() {
@@ -69,22 +130,11 @@ export class SideBarComponent implements OnInit, OnDestroy {
       let circuit = new Project(crypto.randomUUID(), "Project " + (this.circuits.length + 1));
       this.manager.setNewselectedProject(circuit);
       this.isCreatingProject = false;
+      if (circuit.id) {
+        this.expandedProjects.add(circuit.id);
+      }
       this.router.navigate(['/project', circuit.id]);
     }, 300);
-  }
-
-  selectCircuit(circuit: Project): void {
-    this.manager.setselectedProject(circuit);
-    this.router.navigate(['/project', circuit.id]);
-  }
-
-  isCircuitSelected(circuit: Project): boolean {
-    return this.router.isActive(`/project/${circuit.id}`, {
-      paths: 'exact',
-      queryParams: 'ignored',
-      fragment: 'ignored',
-      matrixParams: 'ignored'
-    });
   }
 
   goToHome() {

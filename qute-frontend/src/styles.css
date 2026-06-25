@@ -1,6 +1,4 @@
 /* Global Styles & Variables */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
     /* Light Mode (Default) */
@@ -36,6 +34,16 @@
 
     --toggle-bg: rgba(255, 255, 255, 0.7);
     --toggle-border: rgba(16, 185, 129, 0.3);
+
+    /* Theme-specific Diagram Variables (Light) */
+    --diagram-bg: #f8fafc; /* Slate 50 */
+    --diagram-border: #cbd5e1; /* Slate 300 */
+    --diagram-text-title: #0f172a; /* Slate 900 */
+    --diagram-text-subtitle: #475569; /* Slate 600 */
+    --diagram-label: #334155; /* Slate 700 */
+    --diagram-wire-line: #cbd5e1; /* Slate 300 line */
+    --diagram-wire-label: #475569;
+    --diagram-assert-label: #059669; /* Darker green for accessibility */
 }
 
 [data-theme='dark'] {
@@ -74,6 +82,16 @@
 
     --toggle-bg: rgba(15, 23, 42, 0.6);
     --toggle-border: rgba(16, 185, 129, 0.3);
+
+    /* Theme-specific Diagram Variables (Dark) */
+    --diagram-bg: #0b0f19; /* Slate 950 */
+    --diagram-border: rgba(255, 255, 255, 0.04);
+    --diagram-text-title: #ffffff;
+    --diagram-text-subtitle: #94a3b8;
+    --diagram-label: #94a3b8;
+    --diagram-wire-line: rgba(16, 185, 129, 0.3);
+    --diagram-wire-label: #94a3b8;
+    --diagram-assert-label: #34d399;
 }
 
 html {

@@ -1,77 +1,155 @@
-<!-- Home Component - Glassmorphism -->
+<!-- Home Landing Page - Simple visual layout matching user request -->
 <div class="home-container">
 
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <div class="hero-content">
-            <div class="hero-icon" style="color: var(--accent-primary);">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Checkmark representing Test/Verify -->
-                    <path d="M8 12L11 15L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    
-                    <!-- Outer dashed orbit (from QuMu style) -->
-                    <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.4" />
-                    
-                    <!-- Corner particles (from QuMu style) -->
-                    <circle cx="5" cy="5" r="1.5" fill="currentColor" />
-                    <circle cx="19" cy="5" r="1.5" fill="currentColor" />
-                    <circle cx="5" cy="19" r="1.5" fill="currentColor" />
-                    <circle cx="19" cy="19" r="1.5" fill="currentColor" />
-                </svg>
-            </div>
-            <h1 class="hero-title">QuTe: Quantum Testing</h1>
-            <p class="hero-subtitle">Execution and testing environment for quantum circuits</p>
-        </div>
+  <!-- Header with Logo and Title -->
+  <header class="home-header">
+    <!-- Circular container for the logo, which will be animated -->
+    <div class="logo-circle-container">
+      <svg class="logo-svg-animated" viewBox="0 0 24 24" width="60" height="60">
+        <!-- Checkmark representing Test/Verify -->
+        <path class="logo-path-check" d="M8 12L11 15L16 9" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        
+        <!-- Outer dashed orbit (from QuMu style) -->
+        <circle class="logo-circle-dashed" cx="12" cy="12" r="8" fill="none" stroke="var(--accent-primary)" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.6" />
+        
+        <!-- Corner particles (from QuMu style) -->
+        <circle class="logo-dot logo-dot-1" cx="5" cy="5" r="1.5" fill="var(--accent-primary)" />
+        <circle class="logo-dot logo-dot-2" cx="19" cy="5" r="1.5" fill="var(--accent-primary)" />
+        <circle class="logo-dot logo-dot-3" cx="5" cy="19" r="1.5" fill="var(--accent-primary)" />
+        <circle class="logo-dot logo-dot-4" cx="19" cy="19" r="1.5" fill="var(--accent-primary)" />
+      </svg>
     </div>
+    <h1 class="main-title">QuTe: Quantum Testing</h1>
+    <p class="main-subtitle">Design, simulate, and verify quantum circuit behavior</p>
+  </header>
 
-    <!-- Main Content -->
-    <div class="content-grid">
+  <!-- Two Column Grid Content -->
+  <main class="grid-content">
+    
+    <!-- Left Column: Explanatory Text Card (Focused on writing and executing test cases) -->
+    <section class="glass-card info-card">
+      <div class="card-header">
+        <svg class="info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <h3>About Quantum Test Suites</h3>
+      </div>
+      
+      <p class="info-text">
+        QuTe is a framework for designing and executing test suites on quantum circuits. Easily define deterministic test cases to verify exact state transitions, or stochastic test cases to validate expected probability distributions.
+      </p>
+      <p class="info-text">
+        Powered by Qiskit Aer, QuTe automatically simulates your circuits and supports mutation analysis by injecting controlled logical faults to evaluate the robustness of your test suites.
+      </p>
 
-        <!-- Info Card -->
-        <div class="glass-card info-card">
-            <div class="card-header">
-                <svg class="card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-                    <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                </svg>
-                <h2 class="card-title">About QuTe</h2>
+    </section>
+
+    <!-- Right Column: Visual Diagram Card (Focused on Deterministic vs Stochastic Test Execution) -->
+    <div class="inner-diagram-container">
+      
+      <div class="diagram-title-block">
+        <h4>Quantum Test Case Execution</h4>
+        <p>Validating circuit outputs through deterministic and stochastic assertions</p>
+      </div>
+
+      <!-- Visual Circuit Comparison -->
+      <div class="circuit-comparison">
+        <!-- Row 1: Deterministic Test Wire -->
+        <div class="comparison-row block-row">
+          <div class="row-header">
+            <span class="row-label text-original">DETERMINISTIC</span>
+            <div class="status-circle circle-success">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
             </div>
-            <p class="card-text">
-                QuTe (Quantum Testing Environment) provides a comprehensive framework to design, simulate, and verify quantum circuits.
-                It enables the creation of both deterministic and stochastic test suites,
-                ensuring that the behavior of quantum circuits aligns with the expected specifications
-                under realistic simulations.
-            </p>
+          </div>
+          <div class="wires-stack">
+            <!-- Qubit 0 -->
+            <div class="diagram-wire">
+              <span class="wire-state-label">q[0]: |0⟩</span>
+              <div class="gate-box gate-x">X</div>
+              <div class="gate-box gate-m">M</div>
+              <span class="wire-assert-label">Assert: |1⟩</span>
+            </div>
+            <!-- Qubit 1 -->
+            <div class="diagram-wire">
+              <span class="wire-state-label">q[1]: |0⟩</span>
+              <div class="gate-box gate-x">X</div>
+              <div class="gate-box gate-m">M</div>
+              <span class="wire-assert-label">Assert: |1⟩</span>
+            </div>
+          </div>
         </div>
 
-        <!-- Image Card -->
-        <div class="glass-card image-card">
-            <div class="image-wrapper" style="display: flex; justify-content: center; align-items: center; height: 100%; color: var(--accent-primary);">
-                <i class="fas fa-vial fa-10x" style="opacity: 0.8; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.4));"></i>
+        <!-- Row 2: Stochastic Test Wire -->
+        <div class="comparison-row block-row">
+          <div class="row-header">
+            <span class="row-label text-stochastic">STOCHASTIC</span>
+            <div class="status-circle circle-success">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
             </div>
+          </div>
+          <div class="wires-stack">
+            <!-- Qubit 0 -->
+            <div class="diagram-wire">
+              <span class="wire-state-label">q[0]: |0⟩</span>
+              <div class="gate-box gate-h">H</div>
+              <div class="gate-box gate-m">M</div>
+              <span class="wire-assert-label">Assert: |00⟩: 50%</span>
+            </div>
+            <!-- Qubit 1 -->
+            <div class="diagram-wire">
+              <span class="wire-state-label">q[1]: |0⟩</span>
+              <div class="gate-box gate-cx">CX</div>
+              <div class="gate-box gate-m">M</div>
+              <span class="wire-assert-label">Assert: |11⟩: 50%</span>
+            </div>
+          </div>
         </div>
+      </div>
 
     </div>
+  </main>
 
-    <!-- Action Button -->
-    <div class="action-section">
-        <button class="start-button" (click)="createCircuit()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor"
-                    stroke-width="2" />
-                <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
-            <span>START CREATING</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-            </svg>
-        </button>
+  <!-- Primary Action CTAs -->
+  <div class="action-buttons">
+    <button class="btn-primary-launch" (click)="createCircuit()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>Start Creating</span>
+    </button>
+    
+    <button *ngIf="!isLoggedIn()" class="btn-secondary-login" (click)="navigateToLogin()">
+      <span>Log In</span>
+    </button>
+  </div>
+
+  <!-- Section for Active Projects (Minimal display at bottom) -->
+  <section class="active-projects-section" *ngIf="circuits.length > 0">
+    <div class="projects-divider">
+      <span>Your Active Projects</span>
     </div>
-
-    <!-- Floating Particles -->
-    <div class="particle particle-1"></div>
-    <div class="particle particle-2"></div>
-    <div class="particle particle-3"></div>
+    
+    <div class="projects-horizontal-list">
+      <div class="project-mini-card" *ngFor="let proj of circuits" (click)="selectCircuit(proj)">
+        <div class="project-mini-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+          </svg>
+          <span class="project-mini-name">{{ proj.name || 'Untitled Project' }}</span>
+        </div>
+        <svg class="chevron-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </div>
+    </div>
+  </section>
 
 </div>
