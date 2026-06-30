@@ -9,7 +9,6 @@ edu/uclm/qute/service/PythonScriptBuilder.class
 edu/uclm/qute/config/CorsConfig$1.class
 edu/uclm/qute/service/TestExecutionService.class
 edu/uclm/qute/config/CorsConfig.class
-edu/uclm/qute/runner/QuantumRunner.class
 edu/uclm/qute/controller/CircuitController.class
 edu/uclm/qute/controller/TestExecutionController.class
 edu/uclm/qute/runner/QuantumRunnerResult.class

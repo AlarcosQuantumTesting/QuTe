@@ -1,6 +1,6 @@
 package edu.uclm.qute.service;
 
-import edu.uclm.qute.runner.QuantumRunner;
+import edu.uclm.qute.runner.RemoteCodeRunner;
 import edu.uclm.qute.runner.QuantumRunnerResult;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,18 +11,21 @@ import java.util.Map;
 @Service
 public class CircuitService {
 
-    @Value("${python.executable}")
-    private String pythonExecutable;
+    @Value("${proxy.url}")
+    private String proxyUrl;
 
-    @Value("${python.path}")
-    private String pythonPath;
+    @Value("${remote.runner.url}")
+    private String remoteRunnerUrl;
 
-    @Value("${python.working.directory}")
-    private String workingDirectory;
+    private static String sanitizeCircuitCode(String circuitCode) {
+        return circuitCode
+                .replace(", assemble", "")
+                .replace("assemble, ", "");
+    }
 
     public Map<String, Object> validate(String circuitCode) {
         StringBuilder sb = new StringBuilder();
-        sb.append(circuitCode).append("\n\n");
+        sb.append(sanitizeCircuitCode(circuitCode)).append("\n\n");
         sb.append("""
 import json
 import traceback
@@ -43,11 +46,10 @@ except Exception as e:
     }))
 """);
 
-        QuantumRunnerResult result = QuantumRunner.execute(
+        QuantumRunnerResult result = RemoteCodeRunner.execute(
                 sb.toString(),
-                pythonExecutable,
-                pythonPath,
-                workingDirectory
+                proxyUrl,
+                remoteRunnerUrl
         );
 
         if (result.getExitCode() != 0) {
@@ -60,7 +62,7 @@ except Exception as e:
 
     public Map<String, Object> draw(String circuitCode) {
         StringBuilder sb = new StringBuilder();
-        sb.append(circuitCode).append("\n\n");
+        sb.append(sanitizeCircuitCode(circuitCode)).append("\n\n");
         sb.append("""
 import json
 import base64
@@ -91,11 +93,10 @@ except Exception as e:
     }))
 """);
 
-        QuantumRunnerResult result = QuantumRunner.execute(
+        QuantumRunnerResult result = RemoteCodeRunner.execute(
                 sb.toString(),
-                pythonExecutable,
-                pythonPath,
-                workingDirectory
+                proxyUrl,
+                remoteRunnerUrl
         );
 
         if (result.getExitCode() != 0) {

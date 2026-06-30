@@ -1,25 +1,26 @@
 package edu.uclm.qute.service;
 
 import edu.uclm.qute.model.TestExecutionRequest;
-import edu.uclm.qute.runner.QuantumRunner;
+import edu.uclm.qute.runner.RemoteCodeRunner;
 import edu.uclm.qute.runner.QuantumRunnerResult;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
 public class TestExecutionService {
 
-    @Value("${python.executable}")
-    private String pythonExecutable;
+    @Value("${proxy.url}")
+    private String proxyUrl;
 
-    @Value("${python.path}")
-    private String pythonPath;
-
-    @Value("${python.working.directory}")
-    private String workingDirectory;
+    @Value("${remote.runner.url}")
+    private String remoteRunnerUrl;
 
     public Map<String, Object> runDeterministic(TestExecutionRequest request) {
         String script = PythonScriptBuilder.buildDeterministicScript(
@@ -31,11 +32,10 @@ public class TestExecutionService {
                 request.getInitValues()
         );
 
-        QuantumRunnerResult result = QuantumRunner.execute(
+        QuantumRunnerResult result = RemoteCodeRunner.execute(
                 script,
-                pythonExecutable,
-                pythonPath,
-                workingDirectory
+                proxyUrl,
+                remoteRunnerUrl
         );
 
         if (result.getExitCode() != 0) {
@@ -51,21 +51,20 @@ public class TestExecutionService {
     }
 
     public Map<String, Object> runStochastic(TestExecutionRequest request) {
+        // 1. Build simplified script (only circuit execution, no test comparison)
         String script = PythonScriptBuilder.buildStochasticScript(
                 request.getCircuitCode(),
                 request.getInputs(),
                 request.getOutputs(),
-                request.getTestSuite(),
                 request.getShots(),
-                request.getErrorRange(),
                 request.getInitValues()
         );
 
-        QuantumRunnerResult result = QuantumRunner.execute(
+        // 2. Execute remotely
+        QuantumRunnerResult result = RemoteCodeRunner.execute(
                 script,
-                pythonExecutable,
-                pythonPath,
-                workingDirectory
+                proxyUrl,
+                remoteRunnerUrl
         );
 
         if (result.getExitCode() != 0) {
@@ -77,6 +76,132 @@ public class TestExecutionService {
             throw new RuntimeException("Python execution error: " + json.optString("error") + "\\n" + json.optString("traceback"));
         }
 
-        return json.toMap();
+        // 3. Compare execution results with test cases in Java
+        Map<String, Object> executionResult = json.toMap();
+        return compareStochasticResults(
+                executionResult,
+                request.getTestSuite(),
+                request.getShots(),
+                request.getErrorRange()
+        );
+    }
+
+    /**
+     * Compares the raw execution counts from the quantum circuit against the test suite.
+     * 
+     * @param executionResult Raw results from circuit execution (contains counts, images)
+     * @param testSuiteJson   JSON string: [[expected_output_bits, expected_probability], ...]
+     * @param shots           Number of shots used in the simulation
+     * @param errorRange      Tolerance for probability comparison (nullable)
+     * @return Complete result map in the format expected by the frontend
+     */
+    private Map<String, Object> compareStochasticResults(
+            Map<String, Object> executionResult,
+            String testSuiteJson,
+            int shots,
+            Double errorRange) {
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> counts = (Map<String, Object>) executionResult.get("counts");
+        if (counts == null) {
+            counts = new LinkedHashMap<>();
+        }
+
+        JSONArray testSuite = new JSONArray(testSuiteJson);
+        List<Map<String, Object>> percentages = new ArrayList<>();
+
+        for (int i = 0; i < testSuite.length(); i++) {
+            JSONArray testCase = testSuite.getJSONArray(i);
+            JSONArray expectedOut = testCase.getJSONArray(0);
+
+            // Parse expected probability
+            Double expectedPercent = parseExpectedPercent(testCase);
+
+            // Convert expected output bits to counts key (Qiskit uses reversed bit order)
+            String key = bitsToKey(expectedOut);
+
+            // Look up hits in counts
+            int nHits = 0;
+            if (counts.containsKey(key)) {
+                nHits = ((Number) counts.get(key)).intValue();
+            }
+            double percent = Math.round((nHits / (double) shots) * 100.0 * 100.0) / 100.0;
+
+            // Determine verdict
+            boolean ok;
+            if (expectedPercent != null && errorRange != null) {
+                ok = percent >= (expectedPercent - errorRange);
+            } else if (expectedPercent != null) {
+                ok = percent >= expectedPercent;
+            } else {
+                ok = percent >= 50.0;
+            }
+
+            // Build result entry matching frontend format
+            Map<String, Object> entry = new LinkedHashMap<>();
+            List<Integer> outputList = new ArrayList<>();
+            for (int j = 0; j < expectedOut.length(); j++) {
+                outputList.add(expectedOut.getInt(j));
+            }
+            entry.put("output", outputList);
+            entry.put("counts", nHits);
+            entry.put("percent", percent);
+            entry.put("expected_percent", expectedPercent);
+            entry.put("tolerance", errorRange);
+            entry.put("ok", ok);
+
+            percentages.add(entry);
+        }
+
+        // Build final result with images from execution + comparison percentages
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("status", "success");
+        result.put("cutImageBase64", executionResult.get("cutImageBase64"));
+        result.put("qtccImageBase64", executionResult.get("qtccImageBase64"));
+        result.put("percentages", percentages);
+
+        return result;
+    }
+
+    /**
+     * Converts expected output bits to a Qiskit counts key (reversed bit order).
+     * e.g. [1, 0] → "01"
+     */
+    private String bitsToKey(JSONArray bits) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = bits.length() - 1; i >= 0; i--) {
+            sb.append(bits.getInt(i));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Parses the expected probability from a test case.
+     * Handles both direct numbers and single-element arrays.
+     * Normalizes 0.0-1.0 range to percentage.
+     */
+    private Double parseExpectedPercent(JSONArray testCase) {
+        if (testCase.length() < 2 || testCase.isNull(1)) {
+            return null;
+        }
+
+        Object probObj = testCase.get(1);
+
+        // Handle array wrapping: [[output], [prob]] → unwrap [prob]
+        if (probObj instanceof JSONArray probArray) {
+            if (probArray.length() == 0) return null;
+            probObj = probArray.get(0);
+        }
+
+        try {
+            double value = Double.parseDouble(probObj.toString());
+            if (value >= 0.0 && value <= 1.0) {
+                return Math.round(value * 100.0 * 100.0) / 100.0;
+            } else {
+                return Math.round(value * 100.0) / 100.0;
+            }
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

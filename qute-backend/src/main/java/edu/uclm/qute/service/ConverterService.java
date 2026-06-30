@@ -37,7 +37,7 @@ public class ConverterService {
         StringBuilder code = new StringBuilder();
         code.append("import matplotlib.pyplot as plt\n")
             .append("import numpy as np\n")
-            .append("from qiskit import QuantumCircuit, transpile, assemble, QuantumRegister, ClassicalRegister\n")
+            .append("from qiskit import QuantumCircuit, transpile, QuantumRegister, ClassicalRegister\n")
             .append("from qiskit_aer import AerSimulator\n")
             .append("from math import gcd\n")
             .append("from numpy.random import randint\n")
