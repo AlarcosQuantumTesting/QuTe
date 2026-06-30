@@ -37,11 +37,9 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
 
   // Results fields
   isRunningTests: boolean = false;
-  deterministicLogs: string[] = [];
+  deterministicVerdicts: any[] = [];
   stochasticResults: any[] = [];
   testRunSuccess: boolean = false;
-  cutImageBase64: string | null = null;
-  qtccImageBase64: string | null = null;
 
   // Converter
   isConverting: boolean = false;
@@ -92,9 +90,10 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
   loadFromProject() {
     if (!this.project) return;
 
-    // Load qubit config
-    this.inputQubitsStr = this.project.qProgram.inputQubits || '0,1';
-    this.outputQubitsStr = this.project.qProgram.outputQubits || '0,1';
+    const rawInputs = this.project.qProgram.inputQubits;
+    this.inputQubitsStr = Array.isArray(rawInputs) ? rawInputs.join(',') : (rawInputs !== null && rawInputs !== undefined ? String(rawInputs) : '0,1');
+    const rawOutputs = this.project.qProgram.outputQubits;
+    this.outputQubitsStr = Array.isArray(rawOutputs) ? rawOutputs.join(',') : (rawOutputs !== null && rawOutputs !== undefined ? String(rawOutputs) : '0,1');
     this.shots = this.project.qProgram.shots || 1024;
 
     const selectedInputs = (this.inputQubitsStr || '').split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
@@ -213,11 +212,9 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
   }
 
   clearResults() {
-    this.deterministicLogs = [];
+    this.deterministicVerdicts = [];
     this.stochasticResults = [];
     this.testRunSuccess = false;
-    this.cutImageBase64 = null;
-    this.qtccImageBase64 = null;
   }
 
   getConvertedCodeObservable(): Observable<{ code: string }> {
@@ -346,9 +343,7 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
         if (this.testSuiteType === 'DETERMINISTIC') {
           this.quteExecution.runDeterministic(request).subscribe({
             next: (runRes) => {
-              this.deterministicLogs = runRes.logs;
-              this.cutImageBase64 = runRes.cutImageBase64;
-              this.qtccImageBase64 = runRes.qtccImageBase64;
+              this.deterministicVerdicts = runRes.verdicts;
               this.testRunSuccess = true;
               this.isRunningTests = false;
               this.activeSection = 'results';
@@ -365,8 +360,6 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
           this.quteExecution.runStochastic(stochRequest).subscribe({
             next: (runRes) => {
               this.stochasticResults = runRes.percentages;
-              this.cutImageBase64 = null;
-              this.qtccImageBase64 = null;
               this.testRunSuccess = true;
               this.isRunningTests = false;
               this.activeSection = 'results';
@@ -429,6 +422,16 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
       if (tc.type === 'STOCHASTIC') total += tc.probability || 0;
     });
     return Math.round(total * 100) / 100;
+  }
+
+  getDeterministicPassCount(): number {
+    return this.deterministicVerdicts.filter(v => v.verdict).length;
+  }
+
+  getDeterministicPassRate(): number {
+    if (this.deterministicVerdicts.length === 0) return 0;
+    const count = this.getDeterministicPassCount();
+    return Math.round((count / this.deterministicVerdicts.length) * 100);
   }
 
   isLoggedIn(): boolean {

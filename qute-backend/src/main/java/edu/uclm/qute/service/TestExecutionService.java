@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class TestExecutionService {
@@ -110,6 +112,7 @@ public class TestExecutionService {
 
         JSONArray testSuite = new JSONArray(testSuiteJson);
         List<Map<String, Object>> percentages = new ArrayList<>();
+        Set<String> expectedKeys = new HashSet<>();
 
         for (int i = 0; i < testSuite.length(); i++) {
             JSONArray testCase = testSuite.getJSONArray(i);
@@ -120,6 +123,7 @@ public class TestExecutionService {
 
             // Convert expected output bits to counts key (Qiskit uses reversed bit order)
             String key = bitsToKey(expectedOut);
+            expectedKeys.add(key);
 
             // Look up hits in counts
             int nHits = 0;
@@ -152,6 +156,31 @@ public class TestExecutionService {
             entry.put("ok", ok);
 
             percentages.add(entry);
+        }
+
+        // Add outcomes that occurred but were not part of the defined test cases
+        for (String countKey : counts.keySet()) {
+            if (!expectedKeys.contains(countKey)) {
+                int nHits = ((Number) counts.get(countKey)).intValue();
+                double percent = Math.round((nHits / (double) shots) * 100.0 * 100.0) / 100.0;
+
+                Map<String, Object> entry = new LinkedHashMap<>();
+                List<Integer> outputList = new ArrayList<>();
+                // Reverse Qiskit countKey back to output bit order
+                for (int j = countKey.length() - 1; j >= 0; j--) {
+                    outputList.add(Character.getNumericValue(countKey.charAt(j)));
+                }
+
+                entry.put("output", outputList);
+                entry.put("counts", nHits);
+                entry.put("percent", percent);
+                entry.put("expected_percent", null);
+                entry.put("tolerance", errorRange);
+                entry.put("ok", true); // Unspecified outcomes do not cause failure since they are ignored
+                entry.put("unspecified", true);
+
+                percentages.add(entry);
+            }
         }
 
         // Build final result (no circuit images in stochastic flow)

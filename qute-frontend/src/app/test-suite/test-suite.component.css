@@ -387,3 +387,528 @@
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Custom Bar Chart for Stochastic Results */
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-glass-light);
+  padding-bottom: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.expected-legend {
+  border: 1px dashed var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.received-legend-ok {
+  background: linear-gradient(0deg, rgba(16, 185, 129, 0.4) 0%, rgba(16, 185, 129, 0.95) 100%);
+}
+
+.received-legend-fail {
+  background: linear-gradient(0deg, rgba(239, 68, 68, 0.4) 0%, rgba(239, 68, 68, 0.95) 100%);
+}
+
+.received-legend-unspecified {
+  background: linear-gradient(0deg, rgba(148, 163, 184, 0.3) 0%, rgba(148, 163, 184, 0.7) 100%);
+}
+
+/* Results Vertical Layout */
+.results-container-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Vertical Bar Chart Styling */
+.vertical-chart {
+  display: flex;
+  height: 300px;
+  margin-top: 12px;
+  gap: 16px;
+  position: relative;
+}
+
+.chart-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  width: 36px;
+  flex-shrink: 0;
+  height: 270px; /* Aligns exactly with the height of the plot area */
+}
+
+.chart-plot-area {
+  position: relative;
+  flex-grow: 1;
+  height: 270px; /* Leaves 30px at the bottom for absolute labels */
+  border-left: 1px solid var(--border-glass-light);
+  border-bottom: 1px solid var(--border-glass-light);
+}
+
+.chart-grid-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0; /* Aligned with baseline */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.grid-line {
+  border-top: 1px dashed rgba(255, 255, 255, 0.05);
+  width: 100%;
+  height: 0;
+}
+
+.chart-columns {
+  position: absolute;
+  top: 0;
+  left: 80px; /* Leave space on the left for the Output title */
+  right: 20px;
+  bottom: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+}
+
+.chart-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.bars-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 100%; /* Sits exactly on the horizontal baseline */
+  width: auto;
+  position: relative;
+}
+
+/* Wider bars */
+.v-bar {
+  width: 32px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  position: relative;
+  height: 0; /* Animate with style.height.% */
+  transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.v-bar.expected {
+  border: 1.5px dashed var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.v-bar.received.ok {
+  background: linear-gradient(0deg, rgba(16, 185, 129, 0.4) 0%, rgba(16, 185, 129, 0.95) 100%);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.2);
+}
+
+.v-bar.received.fail {
+  background: linear-gradient(0deg, rgba(239, 68, 68, 0.4) 0%, rgba(239, 68, 68, 0.95) 100%);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.2);
+}
+
+.v-bar.received.unspecified {
+  background: linear-gradient(0deg, rgba(148, 163, 184, 0.3) 0%, rgba(148, 163, 184, 0.7) 100%);
+}
+
+/* Tooltip on bar hover */
+.v-bar-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f8fafc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+}
+
+.v-bar:hover .v-bar-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.x-axis-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text-primary);
+  margin-top: 8px;
+  white-space: nowrap;
+}
+
+.x-axis-title {
+  position: absolute;
+  top: 100%;
+  left: 16px; /* Aligned next to Y axis line */
+  margin-top: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.chart-column.col-unspecified {
+  opacity: 0.85;
+}
+
+.chart-column.col-unspecified .x-axis-label {
+  color: var(--text-muted);
+}
+
+/* Stylings for unspecified outcome table rows in Metrics & Details */
+tr.row-unspecified {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+tr.row-unspecified .code-font {
+  color: var(--text-muted);
+}
+
+/* Deterministic Visual Results */
+.deterministic-summary-bar {
+  margin-bottom: 20px;
+}
+
+.summary-metric-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-glass-light);
+}
+
+/* Circular Gauge */
+.circular-gauge-container {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.gauge-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.gauge-bg {
+  fill: none;
+  stroke: var(--border-glass-light);
+  stroke-width: 3.5;
+}
+
+.gauge-progress {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gauge-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  line-height: 1.1;
+}
+
+.gauge-percentage {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.gauge-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.summary-details h4 {
+  margin: 0 0 4px 0;
+  color: var(--text-primary);
+}
+
+/* Cards Grid */
+.deterministic-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.det-card {
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-glass-light);
+}
+
+.det-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-glass);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.det-card-pass {
+  border-left: 4px solid #10b981;
+}
+
+.det-card-fail {
+  border-left: 4px solid #ef4444;
+}
+
+.det-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
+}
+
+.det-card-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.det-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.badge-pass {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.badge-fail {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.det-card-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.det-field-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Qubit Bit Badges (Matching mockup layout) */
+.qubit-badge-row {
+  display: flex;
+  gap: 6px;
+}
+
+.qubit-bit-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 22px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 13px;
+  user-select: none;
+}
+
+/* Input bits - emerald green styling */
+.qubit-bit-badge.input {
+  background: rgba(16, 185, 129, 0.08);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.qubit-bit-badge.input.bit-one {
+  background: rgba(16, 185, 129, 0.85);
+  color: #fff;
+  border: 1px solid #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.3);
+}
+
+/* Expected bits - orange/brown styling */
+.qubit-bit-badge.expected {
+  background: rgba(186, 80, 17, 0.08);
+  color: #BA5011;
+  border: 1px solid rgba(186, 80, 17, 0.3);
+}
+
+.qubit-bit-badge.expected.bit-one {
+  background: rgba(186, 80, 17, 0.85);
+  color: #fff;
+  border: 1px solid #BA5011;
+  box-shadow: 0 0 6px rgba(186, 80, 17, 0.3);
+}
+
+/* Actual output bits: green on match, red on mismatch */
+.qubit-bit-badge.actual.bit-match {
+  background: rgba(16, 185, 129, 0.08);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.qubit-bit-badge.actual.bit-match.bit-one {
+  background: rgba(16, 185, 129, 0.85);
+  color: #fff;
+  border: 1px solid #10b981;
+}
+
+.qubit-bit-badge.actual.bit-mismatch {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.qubit-bit-badge.actual.bit-mismatch.bit-one {
+  background: rgba(239, 68, 68, 0.85);
+  color: #fff;
+  border: 1px solid #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
+}
+
+/* Visual Circuit Flow Line */
+.det-card-flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.flow-line {
+  flex-grow: 1;
+  height: 1px;
+  border-top: 1px dashed var(--border-glass-light);
+}
+
+.flow-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border: 1px solid var(--border-glass-light);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  gap: 2px;
+}
+
+.flow-box i {
+  font-size: 12px;
+  color: var(--accent-primary);
+}
+
+.flow-box span {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Output comparison side-by-side */
+.output-comparison {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.comparison-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.comparison-divider {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-muted);
+  align-self: flex-end;
+  margin-bottom: 4px;
+}

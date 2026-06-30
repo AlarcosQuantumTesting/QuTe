@@ -125,8 +125,10 @@ export class ProjectConfigComponent implements OnInit, OnDestroy {
       this.circuitCode = '';
     }
 
-    this.inputQubitsStr = this.project.qProgram.inputQubits || '0,1';
-    this.outputQubitsStr = this.project.qProgram.outputQubits || '0,1';
+    const rawInputs = this.project.qProgram.inputQubits;
+    this.inputQubitsStr = Array.isArray(rawInputs) ? rawInputs.join(',') : (rawInputs !== null && rawInputs !== undefined ? String(rawInputs) : '0,1');
+    const rawOutputs = this.project.qProgram.outputQubits;
+    this.outputQubitsStr = Array.isArray(rawOutputs) ? rawOutputs.join(',') : (rawOutputs !== null && rawOutputs !== undefined ? String(rawOutputs) : '0,1');
     this.loadQubitSelections();
   }
 

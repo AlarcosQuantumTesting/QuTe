@@ -38,46 +38,60 @@ public class PythonScriptBuilder {
 
         sb.append("test_suite = ").append(testSuiteJson).append("\n");
 
-        // Execution logic
+        // Execution logic: run each test case and collect verdicts
         sb.append("""
                 try:
                     CuT = create_cut_circuit()
-
-                    # Render CuT
-                    cut_img = circuit_to_base64(CuT)
-
-                    # Build QTCC preview using init_values or first test case input
-                    preview_init = init_values
-                    if preview_init is None and len(test_suite) > 0:
-                        preview_init = test_suite[0][0]
-
-                    # Normalize preview_init (replace empty strings with None)
-                    if isinstance(preview_init, list):
-                        preview_init = [None if str(v).strip() == "" else v for v in preview_init]
-
-                    expected_out = test_suite[0][1] if len(test_suite) > 0 else None
-
-                    QTCC_preview = generateQTCC_deterministic(CuT, outputs, preview_init, expected_out, inputs)
-                    qtcc_img = circuit_to_base64(QTCC_preview)
+                    n_qubits = len(list(q for qr in CuT.qregs for q in qr))
 
                     # Run tests
-                    logs = []
-                    simulator = Aer.get_backend('qasm_simulator')
+                    verdicts = []
+                    simulator = AerSimulator()
                     for inp, expected in test_suite:
                         # Normalize input
                         norm_inp = [None if str(v).strip() == "" else v for v in inp]
+                        
+                        # 1. Run quantum check assertion circuit to verify verdict
                         QTCC = generateQTCC_deterministic(CuT, outputs, norm_inp, expected, inputs)
                         circ = transpile(QTCC, simulator)
-                        result = simulator.run(circ, shots=shots, memory=True).result()
+                        result = simulator.run(circ, shots=shots).result()
                         counts = result.get_counts()
                         verdict = '1' in counts.keys()
-                        logs.append(f"Input: {inp} → Expected: {expected} → Verdict: {verdict}")
+                        
+                        # 2. Run standard circuit to get the actual measured output bits
+                        qr_cut = QuantumRegister(n_qubits)
+                        cr_out = ClassicalRegister(len(outputs))
+                        actual_circ = QuantumCircuit(qr_cut, cr_out)
+                        for j, idx in enumerate(inputs):
+                            try:
+                                spec = norm_inp[j]
+                            except:
+                                spec = 0
+                            _prepare_qubit(actual_circ, qr_cut, idx, spec)
+                        
+                        actual_circ.append(CuT.to_instruction(), qr_cut)
+                        for i, out_idx in enumerate(outputs):
+                            actual_circ.measure(qr_cut[out_idx], cr_out[i])
+                            
+                        actual_circ_transpiled = transpile(actual_circ, simulator)
+                        actual_result = simulator.run(actual_circ_transpiled, shots=shots).result()
+                        actual_counts = actual_result.get_counts()
+                        
+                        # Find the most frequent outcome key (e.g. "01")
+                        most_frequent_key = max(actual_counts, key=actual_counts.get)
+                        # Qiskit key is in reversed bit order, e.g. "01" means bit 0 is 1 and bit 1 is 0
+                        actual_bits = [int(char) for char in reversed(most_frequent_key)]
+
+                        verdicts.append({
+                            "input": inp,
+                            "expected": expected,
+                            "actual": actual_bits,
+                            "verdict": verdict
+                        })
 
                     print(json.dumps({
                         "status": "success",
-                        "cutImageBase64": cut_img,
-                        "qtccImageBase64": qtcc_img,
-                        "logs": logs
+                        "verdicts": verdicts
                     }))
                 except Exception as e:
                     print(json.dumps({
@@ -153,16 +167,10 @@ public class PythonScriptBuilder {
 
     private static void appendCommonLobe(StringBuilder sb) {
         sb.append("""
-                import sys
                 import json
-                import base64
-                import io
                 import traceback
                 from qiskit import QuantumCircuit, transpile, QuantumRegister, ClassicalRegister
-                from qiskit_aer import Aer
-                import matplotlib
-                matplotlib.use('Agg')
-                import matplotlib.pyplot as plt
+                from qiskit_aer import AerSimulator
 
                 def _prepare_qubit(circ: QuantumCircuit, qreg: QuantumRegister, idx: int, spec):
                     if spec is None:
@@ -231,40 +239,6 @@ public class PythonScriptBuilder {
                     QTCC.mcx(valueCheck_qr, verdict_qr)
                     QTCC.measure(verdict_qr, verdict_bit)
                     return QTCC
-
-                def generateQTCC_stochastic(CuT, CuT_output_indexes, input_values, input_indexes):
-                    CuT_qubits = list(q for qr in CuT.qregs for q in qr)
-                    n_qubits = len(CuT_qubits)
-                    QTCC = QuantumCircuit()
-                    qreg = QuantumRegister(n_qubits, "QTCC_input")
-                    creg = ClassicalRegister(len(CuT_output_indexes or []), "c_out")
-                    QTCC.add_register(qreg, creg)
-                    if input_indexes:
-                        for j, idx in enumerate(input_indexes):
-                            spec = 0
-                            if input_values:
-                                try:
-                                    spec = input_values[j]
-                                except:
-                                    spec = 0
-                            _prepare_qubit(QTCC, qreg, idx, spec)
-                    QTCC.barrier(qreg)
-                    QTCC.append(CuT.to_instruction(), qreg)
-                    QTCC.barrier(qreg)
-                    for i, q_idx in enumerate(CuT_output_indexes or []):
-                        QTCC.measure(qreg[q_idx], creg[i])
-                    return QTCC
-
-                def circuit_to_base64(qc):
-                    try:
-                        fig = qc.draw(output='mpl')
-                        buf = io.BytesIO()
-                        fig.savefig(buf, format='png', bbox_inches='tight')
-                        plt.close(fig)
-                        buf.seek(0)
-                        return base64.b64encode(buf.read()).decode('utf-8')
-                    except Exception as e:
-                        return "Error drawing: " + str(e)
                 """);
     }
 }

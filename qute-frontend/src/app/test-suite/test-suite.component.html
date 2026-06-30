@@ -178,14 +178,17 @@
         </table>
 
         <!-- Probability Check -->
-        <div class="prob-check" [class.prob-ok]="getStochasticTotalProbability() === 100"
-             [class.prob-warn]="getStochasticTotalProbability() !== 100">
+        <div class="prob-check" [class.prob-ok]="getStochasticTotalProbability() <= 100"
+             [class.prob-warn]="getStochasticTotalProbability() > 100">
           <span>Total Probability: <strong>{{ getStochasticTotalProbability() }}%</strong></span>
-          <span *ngIf="getStochasticTotalProbability() !== 100">
-            <i class="fas fa-exclamation-triangle"></i> Must sum to 100%
+          <span *ngIf="getStochasticTotalProbability() > 100">
+            <i class="fas fa-exclamation-triangle"></i> Cannot exceed 100%
           </span>
-          <span *ngIf="getStochasticTotalProbability() === 100">
-            <i class="fas fa-check-circle"></i> Ready for simulation
+          <span *ngIf="getStochasticTotalProbability() <= 100 && getStochasticTotalProbability() === 100">
+            <i class="fas fa-check-circle"></i> Ready (Complete coverage)
+          </span>
+          <span *ngIf="getStochasticTotalProbability() <= 100 && getStochasticTotalProbability() < 100">
+            <i class="fas fa-info-circle"></i> Ready (Partial coverage; unspecified outcomes ignored)
           </span>
         </div>
       </div>
@@ -205,30 +208,117 @@
       </button>
     </div>
 
-    <div *ngIf="testRunSuccess" class="results-grid">
+    <div *ngIf="testRunSuccess" class="results-container-vertical">
 
-      <!-- Left: Logs / Stochastic Table -->
+      <!-- Left: Logs / Stochastic Table / Deterministic verdicts -->
       <div class="glass-card">
         <h4 style="margin-top:0; border-bottom:1px solid var(--border-glass-light); padding-bottom:8px;">
           Metrics & Details
         </h4>
 
-        <!-- Deterministic Logs -->
+        <!-- Deterministic Verdicts -->
         <div *ngIf="testSuiteType === 'DETERMINISTIC'">
-          <ul style="list-style:none; padding:0; margin:0;">
-            <li *ngFor="let log of deterministicLogs"
-                style="padding:8px 12px; margin-bottom:8px; border-radius:6px; background:rgba(16,185,129,0.1);
-                       border-left:4px solid #10b981; font-family:monospace; font-size:13px;">
-              {{ log }}
-            </li>
-          </ul>
+          <!-- Summary Card -->
+          <div class="deterministic-summary-bar">
+            <div class="summary-metric-card">
+              <!-- Circular Gauge -->
+              <div class="circular-gauge-container">
+                <svg class="gauge-svg" viewBox="0 0 36 36">
+                  <path class="gauge-bg"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                  <path class="gauge-progress"
+                    [style.strokeDasharray]="getDeterministicPassRate() + ', 100'"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                </svg>
+                <div class="gauge-text">
+                  <span class="gauge-percentage">{{ getDeterministicPassRate() }}%</span>
+                  <span class="gauge-label">Passed</span>
+                </div>
+              </div>
+              
+              <div class="summary-details">
+                <h4 style="margin: 0 0 4px 0; font-size: 16px;">Execution Summary</h4>
+                <p style="margin: 0; font-size: 13px; color: var(--text-secondary);">
+                  Passed <strong style="color: var(--accent-primary);">{{ getDeterministicPassCount() }}</strong> out of <strong>{{ deterministicVerdicts.length }}</strong> test cases
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cards Grid -->
+          <div class="deterministic-cards-grid" style="margin-top: 20px;">
+            <div *ngFor="let v of deterministicVerdicts; let i = index" 
+                 class="det-card glass-panel" 
+                 [class.det-card-pass]="v.verdict" 
+                 [class.det-card-fail]="!v.verdict">
+              
+              <div class="det-card-header">
+                <span class="det-card-title">TEST-{{ i + 1 | number:'3.0-0' }}</span>
+                <span class="det-badge" [class.badge-pass]="v.verdict" [class.badge-fail]="!v.verdict">
+                  {{ v.verdict ? 'PASS' : 'FAIL' }}
+                </span>
+              </div>
+
+              <!-- Input State Row -->
+              <div class="det-card-field">
+                <span class="det-field-label">Input State</span>
+                <div class="qubit-badge-row">
+                  <span *ngFor="let bit of v.input" class="qubit-bit-badge input" [class.bit-one]="bit === 1">
+                    {{ bit }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Flow animation visual -->
+              <div class="det-card-flow">
+                <div class="flow-line"></div>
+                <div class="flow-box">
+                  <i class="fas fa-microchip"></i>
+                  <span>Circuit</span>
+                </div>
+                <div class="flow-line"></div>
+              </div>
+
+              <!-- Output State Row -->
+              <div class="det-card-outputs">
+                <div class="output-comparison">
+                  <div class="comparison-column">
+                    <span class="det-field-label">Expected</span>
+                    <div class="qubit-badge-row">
+                      <span *ngFor="let bit of v.expected" class="qubit-bit-badge expected" [class.bit-one]="bit === 1">
+                        {{ bit }}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div class="comparison-divider">vs</div>
+                  
+                  <div class="comparison-column">
+                    <span class="det-field-label">Actual</span>
+                    <div class="qubit-badge-row">
+                      <span *ngFor="let bit of v.actual; let bitIdx = index" 
+                            class="qubit-bit-badge actual" 
+                            [class.bit-one]="bit === 1"
+                            [class.bit-match]="bit === v.expected[bitIdx]"
+                            [class.bit-mismatch]="bit !== v.expected[bitIdx]">
+                        {{ bit }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
 
         <!-- Stochastic Table -->
         <div *ngIf="testSuiteType === 'STOCHASTIC'">
           <table style="width:100%; border-collapse:collapse; font-size:13px;">
             <thead>
-              <tr style="border-bottom:1px solid var(--border-glass-light); text-align:left;">
+              <tr style="border-bottom: 1px solid var(--border-glass-light); text-align:left;">
                 <th style="padding:8px;">Output (Bits)</th>
                 <th style="padding:8px;">Hits</th>
                 <th style="padding:8px;">Frequency (%)</th>
@@ -238,15 +328,16 @@
             </thead>
             <tbody>
               <tr *ngFor="let res of stochasticResults"
-                  style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                  [class.row-unspecified]="res.expected_percent === null"
+                  style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                 <td style="padding:8px;" class="code-font">{{ res.output.join(',') }}</td>
                 <td style="padding:8px;">{{ res.counts }}</td>
                 <td style="padding:8px;">{{ res.percent }}%</td>
-                <td style="padding:8px;">{{ res.expected_percent }}%</td>
+                <td style="padding:8px;">{{ res.expected_percent !== null ? res.expected_percent + '%' : 'N/A' }}</td>
                 <td style="padding:8px; text-align:center;">
-                  <span [style.background-color]="res.ok ? '#10b981' : '#ef4444'"
+                  <span [style.background-color]="res.expected_percent === null ? '#64748b' : (res.ok ? '#10b981' : '#ef4444')"
                         style="color:white; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:600;">
-                    {{ res.ok ? 'OK' : 'FAIL' }}
+                    {{ res.expected_percent === null ? 'IGNORED' : (res.ok ? 'OK' : 'FAIL') }}
                   </span>
                 </td>
               </tr>
@@ -255,23 +346,78 @@
         </div>
       </div>
 
-      <!-- Right: QTCC Images (only for deterministic tests) -->
-      <div *ngIf="testSuiteType === 'DETERMINISTIC'" class="glass-card" style="display:flex; flex-direction:column; gap:16px; align-items:center;">
-        <h4 style="margin:0; align-self:flex-start; border-bottom:1px solid var(--border-glass-light);
-                   padding-bottom:8px; width:100%;">Circuits Generated by QTCC</h4>
-        <div *ngIf="qtccImageBase64" style="width:100%; text-align:center;">
-          <span style="font-size:12px; font-weight:500; display:block; margin-bottom:6px;">Quantum Test Circuit (QTCC)</span>
-          <img [src]="'data:image/png;base64,' + qtccImageBase64" alt="QTCC Circuit"
-               style="max-width:100%; border-radius:8px; border:1px solid var(--border-glass-light);">
-        </div>
-        <div *ngIf="cutImageBase64" style="width:100%; text-align:center;">
-          <span style="font-size:12px; font-weight:500; display:block; margin-bottom:6px;">Circuit under Test (CuT)</span>
-          <img [src]="'data:image/png;base64,' + cutImageBase64" alt="CuT Circuit"
-               style="max-width:100%; border-radius:8px; border:1px solid var(--border-glass-light);">
-        </div>
-        <div *ngIf="!qtccImageBase64 && !cutImageBase64" class="text-muted" style="text-align:center; padding:20px;">
-          <i class="fas fa-image fa-2x" style="margin-bottom:8px; display:block; opacity:0.4;"></i>
-          No circuit images available.
+      <!-- Stochastic Bar Chart (placed below the table card) -->
+      <div *ngIf="testSuiteType === 'STOCHASTIC'" class="glass-card">
+        <h4 style="margin-top:0; border-bottom:1px solid var(--border-glass-light); padding-bottom:8px;">
+          Probability Distribution
+        </h4>
+        
+        <div class="chart-container">
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-color expected-legend"></span>
+              <span>Expected</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color received-legend-ok"></span>
+              <span>Received (Pass)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color received-legend-fail"></span>
+              <span>Received (Fail)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color received-legend-unspecified"></span>
+              <span>Received (Unspecified)</span>
+            </div>
+          </div>
+
+          <!-- Vertical Bar Chart -->
+          <div class="vertical-chart">
+            <div class="chart-y-axis">
+              <span>100%</span>
+              <span>75%</span>
+              <span>50%</span>
+              <span>25%</span>
+              <span>0%</span>
+            </div>
+            
+            <div class="chart-plot-area">
+              <div class="x-axis-title">Output:</div>
+              <!-- Grid Lines -->
+              <div class="chart-grid-lines">
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+              </div>
+              
+              <!-- Columns for each outcome -->
+              <div class="chart-columns">
+                <div *ngFor="let res of stochasticResults" class="chart-column" [class.col-unspecified]="res.expected_percent === null">
+                  <div class="bars-group">
+                    <!-- Expected Bar -->
+                    <div class="v-bar expected" 
+                         *ngIf="res.expected_percent !== null && res.expected_percent > 0"
+                         [style.height.%]="res.expected_percent">
+                      <span class="v-bar-tooltip">Expected: {{ res.expected_percent }}%</span>
+                    </div>
+                    
+                    <!-- Received Bar -->
+                    <div class="v-bar received" 
+                         [ngClass]="res.expected_percent === null ? 'unspecified' : (res.ok ? 'ok' : 'fail')"
+                         [style.height.%]="res.percent">
+                      <span class="v-bar-tooltip">Received: {{ res.percent }}%</span>
+                    </div>
+                  </div>
+                  
+                  <!-- X-axis label (Simple text) -->
+                  <div class="x-axis-label">{{ res.output.join('') }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

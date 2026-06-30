@@ -12,3 +12,4 @@ edu/uclm/qute/config/CorsConfig.class
 edu/uclm/qute/controller/CircuitController.class
 edu/uclm/qute/controller/TestExecutionController.class
 edu/uclm/qute/runner/QuantumRunnerResult.class
+edu/uclm/qute/runner/RemoteCodeRunner.class
