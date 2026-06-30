@@ -99,65 +99,57 @@ public class PythonScriptBuilder {
 
         StringBuilder sb = new StringBuilder();
 
-        // Append user circuit code
+        // Imports (following qumugen template pattern)
+        sb.append("from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit, transpile\n");
+        sb.append("from qiskit_aer import AerSimulator\n");
+        sb.append("from math import pi\n");
+        sb.append("import json\n\n");
+
+        // User circuit code (defines create_cut_circuit())
         sb.append(circuitCode).append("\n\n");
 
-        // Append helper functions and imports
-        appendCommonLobe(sb);
+        // Create the Circuit under Test
+        sb.append("CuT = create_cut_circuit()\n");
+        sb.append("n_qubits = len(list(q for qr in CuT.qregs for q in qr))\n\n");
 
-        // Define parameters
-        sb.append("inputs = ").append(inputs.toString()).append("\n");
-        sb.append("outputs = ").append(outputs.toString()).append("\n");
-        sb.append("shots = ").append(shots).append("\n");
+        // Declaration (like qumugen #DECLARATION#)
+        sb.append("qreg = QuantumRegister(n_qubits)\n");
+        sb.append("creg = ClassicalRegister(").append(outputs.size()).append(")\n");
+        sb.append("circuit = QuantumCircuit(qreg, creg)\n\n");
 
+        // Initialization (like qumugen #INITIALIZATION#)
+        sb.append("#Initialization\n");
         if (initValues != null) {
-            sb.append("init_values = ").append(new JSONArray(initValues).toString()).append("\n");
-        } else {
-            sb.append("init_values = None\n");
+            for (int j = 0; j < inputs.size() && j < initValues.size(); j++) {
+                String val = initValues.get(j);
+                if (val != null && val.trim().equals("1")) {
+                    sb.append("circuit.x(").append(inputs.get(j)).append(")\n");
+                }
+            }
         }
+        sb.append("circuit.barrier()\n\n");
 
-        // Execution logic: only run the circuit and return raw counts
-        sb.append("""
-                try:
-                    CuT = create_cut_circuit()
-                    cut_img = circuit_to_base64(CuT)
+        // Append CuT as instruction (like qumugen #CALCULUS#)
+        sb.append("circuit.append(CuT.to_instruction(), qreg)\n");
+        sb.append("circuit.barrier()\n\n");
 
-                    # Prepare input values
-                    if init_values is not None:
-                        prepared = []
-                        for j in range(len(inputs)):
-                            try:
-                                prepared.append(init_values[j])
-                            except:
-                                prepared.append(0)
-                    else:
-                        prepared = [0] * len(inputs)
-                    prepared = [None if str(v).strip() == "" else v for v in prepared]
+        // Measures (like qumugen #MEASURES#)
+        sb.append("#Measures\n");
+        for (int i = 0; i < outputs.size(); i++) {
+            sb.append("circuit.measure(").append(outputs.get(i)).append(", ").append(i).append(")\n");
+        }
+        sb.append("\n");
 
-                    QTCC = generateQTCC_stochastic(CuT, outputs, prepared, inputs)
-                    qtcc_img = circuit_to_base64(QTCC)
-
-                    simulator = Aer.get_backend('qasm_simulator')
-                    circ = transpile(QTCC, simulator)
-                    counts = simulator.run(circ, shots=shots).result().get_counts()
-
-                    print(json.dumps({
-                        "status": "success",
-                        "cutImageBase64": cut_img,
-                        "qtccImageBase64": qtcc_img,
-                        "counts": counts,
-                        "shots": shots
-                    }))
-                except Exception as e:
-                    print(json.dumps({
-                        "status": "error",
-                        "error": str(e),
-                        "traceback": traceback.format_exc()
-                    }))
-                """);
+        // Execution (like qumugen template)
+        sb.append("simulator = AerSimulator()\n");
+        sb.append("compiled_circuit = transpile(circuit, simulator)\n");
+        sb.append("result = simulator.run(compiled_circuit, shots=").append(shots).append(").result()\n");
+        sb.append("histogram = result.get_counts()\n");
+        sb.append("print(histogram)\n");
 
         return sb.toString();
     }
+
 
     private static void appendCommonLobe(StringBuilder sb) {
         sb.append("""

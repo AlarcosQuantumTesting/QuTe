@@ -365,8 +365,8 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
           this.quteExecution.runStochastic(stochRequest).subscribe({
             next: (runRes) => {
               this.stochasticResults = runRes.percentages;
-              this.cutImageBase64 = runRes.cutImageBase64;
-              this.qtccImageBase64 = runRes.qtccImageBase64;
+              this.cutImageBase64 = null;
+              this.qtccImageBase64 = null;
               this.testRunSuccess = true;
               this.isRunningTests = false;
               this.activeSection = 'results';

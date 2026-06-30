@@ -51,7 +51,7 @@ public class TestExecutionService {
     }
 
     public Map<String, Object> runStochastic(TestExecutionRequest request) {
-        // 1. Build simplified script (only circuit execution, no test comparison)
+        // 1. Build flat Qiskit script (circuit + inputs + measures + execution)
         String script = PythonScriptBuilder.buildStochasticScript(
                 request.getCircuitCode(),
                 request.getInputs(),
@@ -71,15 +71,17 @@ public class TestExecutionService {
             throw new RuntimeException("Python execution failed: " + result.getStderr());
         }
 
-        JSONObject json = new JSONObject(result.getStdout());
-        if ("error".equals(json.optString("status"))) {
-            throw new RuntimeException("Python execution error: " + json.optString("error") + "\\n" + json.optString("traceback"));
-        }
+        // 3. Parse stdout as raw counts JSON (e.g. {'01': 512, '10': 512})
+        //    The Python print() outputs a dict repr, need to handle both Python and JSON formats
+        String stdout = result.getStdout().trim();
+        // Python dicts use single quotes; replace with double quotes for JSON parsing
+        stdout = stdout.replace("'", "\"");
+        JSONObject countsJson = new JSONObject(stdout);
+        Map<String, Object> counts = countsJson.toMap();
 
-        // 3. Compare execution results with test cases in Java
-        Map<String, Object> executionResult = json.toMap();
+        // 4. Compare execution results with test cases in Java
         return compareStochasticResults(
-                executionResult,
+                counts,
                 request.getTestSuite(),
                 request.getShots(),
                 request.getErrorRange()
@@ -88,21 +90,20 @@ public class TestExecutionService {
 
     /**
      * Compares the raw execution counts from the quantum circuit against the test suite.
+     * Counts come directly from the circuit execution stdout (no wrapper JSON).
      * 
-     * @param executionResult Raw results from circuit execution (contains counts, images)
-     * @param testSuiteJson   JSON string: [[expected_output_bits, expected_probability], ...]
-     * @param shots           Number of shots used in the simulation
-     * @param errorRange      Tolerance for probability comparison (nullable)
+     * @param counts        Raw counts from circuit execution (e.g. {"01": 512, "10": 512})
+     * @param testSuiteJson JSON string: [[expected_output_bits, expected_probability], ...]
+     * @param shots         Number of shots used in the simulation
+     * @param errorRange    Tolerance for probability comparison (nullable)
      * @return Complete result map in the format expected by the frontend
      */
     private Map<String, Object> compareStochasticResults(
-            Map<String, Object> executionResult,
+            Map<String, Object> counts,
             String testSuiteJson,
             int shots,
             Double errorRange) {
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> counts = (Map<String, Object>) executionResult.get("counts");
         if (counts == null) {
             counts = new LinkedHashMap<>();
         }
@@ -153,11 +154,9 @@ public class TestExecutionService {
             percentages.add(entry);
         }
 
-        // Build final result with images from execution + comparison percentages
+        // Build final result (no circuit images in stochastic flow)
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("status", "success");
-        result.put("cutImageBase64", executionResult.get("cutImageBase64"));
-        result.put("qtccImageBase64", executionResult.get("qtccImageBase64"));
         result.put("percentages", percentages);
 
         return result;
