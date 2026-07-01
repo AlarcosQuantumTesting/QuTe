@@ -64,8 +64,7 @@
                  (click)="selectTestSuite(circuit, i)">
               <i class="fas fa-vials suite-icon node-icon"></i>
               <span class="node-label">
-                Test Suite
-                <small *ngIf="getTestSuites(circuit).length > 1"> #{{ i + 1 }}</small>
+                Test Suite {{ i + 1 }}
               </span>
             </div>
           </li>
@@ -76,7 +75,15 @@
                  [class.selected]="isSuiteRouteSelected(circuit, 0)"
                  (click)="selectTestSuite(circuit, 0)">
               <i class="fas fa-vials suite-icon node-icon"></i>
-              <span class="node-label">Test Suite</span>
+              <span class="node-label">Test Suite 1</span>
+            </div>
+          </li>
+
+          <!-- Add Test Suite option -->
+          <li class="tree-item add-suite-item">
+            <div class="tree-node add-suite-node" (click)="addTestSuite(circuit); $event.stopPropagation()">
+              <i class="fas fa-plus add-suite-icon node-icon"></i>
+              <span class="node-label text-muted" style="font-style: italic;">Add Test Suite</span>
             </div>
           </li>
 

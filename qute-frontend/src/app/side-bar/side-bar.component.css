@@ -862,3 +862,27 @@
   color: #c4b5fd;
   font-weight: 600;
 }
+
+/* === Add Suite Node === */
+.add-suite-item {
+  margin: 0;
+}
+
+.add-suite-node {
+  padding-left: 0.5rem;
+}
+
+.add-suite-icon {
+  color: #10b981; /* emerald green for plus icon */
+  opacity: 0.8;
+}
+
+.add-suite-item .tree-node:hover .add-suite-icon {
+  color: #34d399;
+  transform: scale(1.15);
+  opacity: 1;
+}
+
+.add-suite-item .tree-node:hover .node-label {
+  color: #34d399;
+}

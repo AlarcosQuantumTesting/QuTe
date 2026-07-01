@@ -350,6 +350,11 @@
   user-select: none;
 }
 .custom-radio:hover { color: var(--text-primary); }
+.custom-radio.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
+}
 .custom-radio input[type="radio"] { display: none; }
 
 .radio-indicator {
@@ -911,4 +916,50 @@ tr.row-unspecified .code-font {
   color: var(--text-muted);
   align-self: flex-end;
   margin-bottom: 4px;
+}
+
+/* === Select wrapper for dropdown === */
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.select-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.select-wrapper select.glass-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  padding-left: 36px;
+  padding-right: 36px;
+  cursor: pointer;
+  height: 38px;
+  box-sizing: border-box;
+}
+
+.select-wrapper select.glass-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.select-chevron {
+  position: absolute;
+  right: 12px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.select-wrapper select.glass-input option {
+  background-color: #1e293b;
+  color: white;
 }

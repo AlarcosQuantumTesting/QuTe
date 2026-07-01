@@ -22,6 +22,7 @@ import { Stochastic } from '../model/Stochastic';
 export class TestSuiteComponent implements OnInit, OnDestroy {
 
   project: Project | null = null;
+  suiteIndex: number = 0;
 
   // Test Suite fields
   shots: number = 1024;
@@ -73,11 +74,31 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.route.paramMap.subscribe(params => {
         const projectId = params.get('projectId');
-        if (projectId && this.manager.projects.length > 0) {
-          const found = this.manager.projects.find(p => p.id === projectId);
-          if (found && this.manager.selectedProject !== found) {
-            this.manager.setselectedProject(found);
-          }
+        const suiteIndexParam = params.get('suiteIndex');
+        if (suiteIndexParam !== null) {
+          this.suiteIndex = parseInt(suiteIndexParam, 10) || 0;
+        } else {
+          this.suiteIndex = 0;
+        }
+
+        if (projectId) {
+          this.subscription.add(
+            this.manager.projects$.subscribe(projects => {
+              const found = projects.find(p => p.id === projectId);
+              if (found) {
+                if (this.manager.selectedProject !== found) {
+                  this.manager.setselectedProject(found);
+                } else {
+                  this.loadFromProject();
+                }
+              } else {
+                const email = sessionStorage.getItem('email');
+                if (email && !this.manager.loadingProjects) {
+                  this.manager.loadProjects(email, true).subscribe();
+                }
+              }
+            })
+          );
         }
       })
     );
@@ -119,9 +140,9 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
       this.circuitCode = this.project.qProgram.qCodes[0].code || '';
     }
 
-    // Load TestSuite
-    if (this.project.testSuites && this.project.testSuites.length > 0) {
-      const suite = this.project.testSuites[0];
+    // Load TestSuite at suiteIndex
+    if (this.project.testSuites && this.project.testSuites.length > this.suiteIndex) {
+      const suite = this.project.testSuites[this.suiteIndex];
       this.errorRange = suite.error_range || 5.0;
 
       if (suite.testCases && suite.testCases.length > 0) {
@@ -141,7 +162,7 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
             keys.forEach(k => {
               const cleanKey = k.replace('[', '').replace(']', '');
               loadedCases.push({
-                id: crypto.randomUUID(),
+                id: tc.id || crypto.randomUUID(),
                 type: 'STOCHASTIC',
                 expected: cleanKey,
                 probability: dist[k]
@@ -164,9 +185,57 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
     } else {
       this.testCases = [];
       this.errorRange = 5.0;
+      this.testSuiteType = 'DETERMINISTIC';
     }
 
     this.clearResults();
+  }
+
+  syncTestSuiteData(): void {
+    if (!this.project) return;
+
+    if (!this.project.testSuites) {
+      this.project.testSuites = [];
+    }
+
+    const suite = new TestSuite();
+    suite.id = (this.project.testSuites.length > this.suiteIndex) ? this.project.testSuites[this.suiteIndex].id : crypto.randomUUID();
+    suite.error_range = this.errorRange;
+
+    const entryIdxs = this.inputQubitsStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+    const outputIdxs = this.outputQubitsStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+
+    if (this.testSuiteType === 'DETERMINISTIC') {
+      suite.testCases = this.testCases.map(tc => {
+        const det = new Deterministic();
+        det.id = tc.id || crypto.randomUUID();
+        det.entryIndexes = entryIdxs;
+        det.outputIndexes = outputIdxs;
+        det.entryValues = this.getBitsArray(tc.input, entryIdxs.length);
+        det.expectedValues = this.getBitsArray(tc.expected, outputIdxs.length);
+        return det;
+      });
+    } else {
+      const stoch = new Stochastic();
+      stoch.id = (this.project.testSuites.length > this.suiteIndex && this.project.testSuites[this.suiteIndex].testCases?.length > 0)
+        ? this.project.testSuites[this.suiteIndex].testCases[0].id : crypto.randomUUID();
+      stoch.entryIndexes = entryIdxs;
+      stoch.outputIndexes = outputIdxs;
+      const distObj: { [key: string]: number } = {};
+      this.testCases.forEach(tc => {
+        if (tc.expected) {
+          const cleanExpected = this.getBitsArray(tc.expected, outputIdxs.length).join(',');
+          distObj[`[${cleanExpected}]`] = tc.probability || 0;
+        }
+      });
+      stoch.probabilityDistribution = distObj as any;
+      suite.testCases = [stoch];
+    }
+
+    while (this.project.testSuites.length <= this.suiteIndex) {
+      this.project.testSuites.push(new TestSuite());
+    }
+    this.project.testSuites[this.suiteIndex] = suite;
   }
 
   addTestCase() {
@@ -185,19 +254,23 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
         probability: 0
       });
     }
+    this.syncTestSuiteData();
     this.manager.markProjectAsModified();
   }
 
   removeTestCase(index: number) {
     this.testCases.splice(index, 1);
+    this.syncTestSuiteData();
     this.manager.markProjectAsModified();
   }
 
   changeTestSuiteType(type: 'DETERMINISTIC' | 'STOCHASTIC') {
+    if (this.testCases.length > 1 || this.testRunSuccess) {
+      return;
+    }
     this.testSuiteType = type;
     this.testCases = [];
     this.addTestCase();
-    this.manager.markProjectAsModified();
   }
 
   onShotsChange() {
@@ -208,6 +281,12 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
   }
 
   onErrorRangeChange() {
+    this.syncTestSuiteData();
+    this.manager.markProjectAsModified();
+  }
+
+  onProbabilityChange() {
+    this.syncTestSuiteData();
     this.manager.markProjectAsModified();
   }
 
@@ -261,40 +340,7 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
     this.project.qProgram.qCodes = [qCode];
     this.project.qProgram.shots = this.shots;
 
-    const suite = new TestSuite();
-    suite.id = this.project.testSuites?.length > 0 ? this.project.testSuites[0].id : crypto.randomUUID();
-    suite.error_range = this.errorRange;
-
-    const entryIdxs = this.inputQubitsStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-    const outputIdxs = this.outputQubitsStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-
-    if (this.testSuiteType === 'DETERMINISTIC') {
-      suite.testCases = this.testCases.map(tc => {
-        const det = new Deterministic();
-        det.id = tc.id || crypto.randomUUID();
-        det.entryIndexes = entryIdxs;
-        det.outputIndexes = outputIdxs;
-        det.entryValues = this.getBitsArray(tc.input, entryIdxs.length);
-        det.expectedValues = this.getBitsArray(tc.expected, outputIdxs.length);
-        return det;
-      });
-    } else {
-      const stoch = new Stochastic();
-      stoch.id = this.project.testSuites?.[0]?.testCases?.[0]?.id || crypto.randomUUID();
-      stoch.entryIndexes = entryIdxs;
-      stoch.outputIndexes = outputIdxs;
-      const distObj: { [key: string]: number } = {};
-      this.testCases.forEach(tc => {
-        if (tc.expected) {
-          const cleanExpected = this.getBitsArray(tc.expected, outputIdxs.length).join(',');
-          distObj[`[${cleanExpected}]`] = tc.probability || 0;
-        }
-      });
-      stoch.probabilityDistribution = distObj as any;
-      suite.testCases = [stoch];
-    }
-
-    this.project.testSuites = [suite];
+    this.syncTestSuiteData();
   }
 
   runTests() {
@@ -412,6 +458,7 @@ export class TestSuiteComponent implements OnInit, OnDestroy {
     if (index >= 0 && index < bits.length) {
       bits[index] = bits[index] === 1 ? 0 : 1;
       tc[type] = bits.join(',');
+      this.syncTestSuiteData();
       this.manager.markProjectAsModified();
     }
   }

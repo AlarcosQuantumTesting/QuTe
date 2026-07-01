@@ -7,7 +7,7 @@
         <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <div>
-        <h2 style="margin:0; font-size:1.25rem;">Test Suite</h2>
+        <h2 style="margin:0; font-size:1.25rem;">Test Suite {{ suiteIndex + 1 }}</h2>
         <span class="text-muted" style="font-size:12px;">{{ project.name }}</span>
       </div>
     </div>
@@ -43,19 +43,15 @@
           <label class="field-label">
             <i class="fas fa-sliders-h" style="color: var(--accent-primary);"></i> Test Suite Type
           </label>
-          <div class="custom-radio-group">
-            <label class="custom-radio">
-              <input type="radio" name="testSuiteType" value="DETERMINISTIC" [(ngModel)]="testSuiteType"
-                     (change)="changeTestSuiteType('DETERMINISTIC')">
-              <span class="radio-indicator"></span>
-              <i class="fas fa-bullseye"></i> Deterministic
-            </label>
-            <label class="custom-radio">
-              <input type="radio" name="testSuiteType" value="STOCHASTIC" [(ngModel)]="testSuiteType"
-                     (change)="changeTestSuiteType('STOCHASTIC')">
-              <span class="radio-indicator"></span>
-              <i class="fas fa-chart-bar"></i> Stochastic
-            </label>
+          <div class="select-wrapper">
+            <i class="fas fa-sliders-h select-icon"></i>
+            <select class="glass-input" [(ngModel)]="testSuiteType"
+                    (change)="changeTestSuiteType(testSuiteType)"
+                    [disabled]="testCases.length > 1 || testRunSuccess">
+              <option value="DETERMINISTIC">Deterministic</option>
+              <option value="STOCHASTIC">Stochastic</option>
+            </select>
+            <i class="fas fa-chevron-down select-chevron"></i>
           </div>
         </div>
 
@@ -163,6 +159,7 @@
                 <div style="display:inline-flex; align-items:center; gap:8px;">
                   <input type="number" class="glass-input"
                          [(ngModel)]="tc.probability"
+                         (ngModelChange)="onProbabilityChange()"
                          min="0" max="100" step="0.1"
                          style="width:120px; text-align:center; font-weight:700; font-size:15px; padding:4px 8px;">
                   <span style="font-weight:600;">%</span>

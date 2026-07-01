@@ -87,6 +87,17 @@ export class SideBarComponent implements OnInit, OnDestroy {
     return project.testSuites && project.testSuites.length > 0 ? project.testSuites : [];
   }
 
+  addTestSuite(circuit: Project): void {
+    if (!circuit.testSuites) {
+      circuit.testSuites = [];
+    }
+    const newSuite = new TestSuite();
+    circuit.testSuites.push(newSuite);
+    this.manager.markProjectAsModified(circuit);
+    const newIndex = circuit.testSuites.length - 1;
+    this.selectTestSuite(circuit, newIndex);
+  }
+
   // ---- Navigation ----
   selectProject(circuit: Project): void {
     this.manager.setselectedProject(circuit);
