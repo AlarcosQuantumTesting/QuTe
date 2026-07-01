@@ -124,8 +124,8 @@
 }
 
 .status-dot.unsaved {
-  background: #fbbf24;
-  box-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
+  background: var(--accent-amber);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
   animation: blink-dot 1.2s ease-in-out infinite;
 }
 

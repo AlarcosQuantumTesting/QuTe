@@ -21,6 +21,12 @@
     /* Emerald 600 */
     --accent-tertiary: #34d399;
     /* Emerald 400 */
+    --accent-teal: #14b8a6;
+    /* Teal 500 */
+    --accent-blue: #0ea5e9;
+    /* Sky 500 */
+    --accent-amber: #f59e0b;
+    /* Amber 500 */
     --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
 
     --border-glass: rgba(16, 185, 129, 0.4);
@@ -69,6 +75,12 @@
     /* Emerald 500 */
     --accent-tertiary: #6ee7b7;
     /* Emerald 300 */
+    --accent-teal: #2dd4bf;
+    /* Teal 400 */
+    --accent-blue: #38bdf8;
+    /* Sky 400 */
+    --accent-amber: #fbbf24;
+    /* Amber 400 */
     --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
 
     --border-glass: rgba(16, 185, 129, 0.3);
