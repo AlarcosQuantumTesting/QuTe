@@ -9,132 +9,120 @@
   gap: 10px;
   padding: 14px 22px;
 
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.95) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(52, 211, 153, 0.4);
-  border-radius: 50px;
-  color: #ffffff;
+  background: var(--accent-secondary);
+  border: 1px solid var(--accent-secondary);
+  border-radius: 0; /* Sharp corner button */
+  color: var(--bg-primary);
   font-size: 14px;
   font-weight: 700;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Fira Sans', sans-serif;
   cursor: pointer;
-  box-shadow:
-    0 8px 32px rgba(16, 185, 129, 0.35),
-    0 2px 8px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: none;
 
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  position: fixed;
+  transition: background 0.15s ease, color 0.15s ease;
   overflow: visible;
-  animation: fab-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: fab-enter 0.3s ease both;
 }
 
 @keyframes fab-enter {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.85);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
 .fab-save:hover:not(:disabled) {
-  transform: translateY(-3px) scale(1.03);
-  box-shadow:
-    0 12px 40px rgba(16, 185, 129, 0.5),
-    0 4px 12px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  background: linear-gradient(135deg, rgba(16, 185, 129, 1) 0%, rgba(5, 150, 105, 1) 100%);
-}
-
-.fab-save:active:not(:disabled) {
-  transform: translateY(-1px) scale(0.99);
+  background: transparent;
+  color: var(--accent-secondary);
 }
 
 .fab-save:disabled {
   cursor: not-allowed;
-  opacity: 0.8;
+  opacity: 0.4;
 }
 
-/* Unsaved state — amber accent */
+/* Unsaved state */
 .fab-save.has-changes {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 1) 100%);
-  box-shadow:
-    0 8px 32px rgba(16, 185, 129, 0.45),
-    0 0 0 1px rgba(52, 211, 153, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
+.fab-save.has-changes:hover:not(:disabled) {
+  background: transparent;
+  color: var(--accent-primary);
 }
 
 /* Saving state */
 .fab-save.saving {
-  background: linear-gradient(135deg, rgba(100, 116, 139, 0.9) 0%, rgba(71, 85, 105, 0.95) 100%);
-  border-color: rgba(148, 163, 184, 0.3);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  background: var(--border-color);
+  border-color: var(--border-color-active);
+  color: var(--text-primary);
 }
 
-/* Pulse ring for unsaved */
+/* Pulse ring for unsaved (Sharp rectangular outline) */
 .pulse-ring {
   position: absolute;
   width: 100%;
   height: 100%;
-  border-radius: 50px;
-  border: 2px solid rgba(16, 185, 129, 0.6);
-  animation: pulse-fab 2s ease-out infinite;
+  border-radius: 0;
+  border: 1px solid var(--accent-primary);
+  animation: pulse-fab-rect 2s ease-out infinite;
   pointer-events: none;
   top: 0;
   left: 0;
 }
 
-@keyframes pulse-fab {
+@keyframes pulse-fab-rect {
   0% {
     transform: scale(1);
     opacity: 0.8;
   }
   70% {
-    transform: scale(1.12);
+    transform: scale(1.08);
     opacity: 0;
   }
   100% {
-    transform: scale(1.12);
+    transform: scale(1.08);
     opacity: 0;
   }
 }
 
 /* Icon */
 .fab-save i {
-  font-size: 16px;
+  font-size: 15px;
 }
 
 /* Label */
 .fab-label {
   white-space: nowrap;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
 }
 
-/* Status dot */
+/* Status dot (Sharp square dot) */
 .status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 0;
   margin-left: 2px;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition: background 0.2s ease;
 }
 
 .status-dot.unsaved {
-  background: var(--accent-amber);
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
-  animation: blink-dot 1.2s ease-in-out infinite;
+  background: var(--accent-danger);
+  animation: blink-dot-rect 1.2s ease-in-out infinite;
 }
 
 .status-dot.saved {
-  background: #d1fae5;
-  box-shadow: 0 0 4px rgba(209, 250, 229, 0.5);
+  background: var(--accent-primary);
 }
 
-@keyframes blink-dot {
+@keyframes blink-dot-rect {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
+

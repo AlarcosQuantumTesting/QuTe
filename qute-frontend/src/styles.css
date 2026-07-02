@@ -1,109 +1,107 @@
-/* Global Styles & Variables */
+/* Global Styles & Variables — Allfeat Grid Style */
 
 :root {
-    /* Light Mode (Default) */
-    --bg-primary: #f5f7fa;
-    --bg-secondary: #e8f5e9;
-    --bg-gradient: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    /* Light Mode (Sage-Mint Base — harmonises with the green sidebar) */
+    --bg-primary: #f0f7f4;
+    --bg-secondary: #e8f3ee;
+    --bg-gradient: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
 
-    --glass-bg: rgba(255, 255, 255, 0.8);
-    --glass-bg-hover: rgba(255, 255, 255, 0.9);
-    --glass-bg-card: rgba(255, 255, 255, 0.7);
-    --glass-bg-sidebar: rgba(255, 255, 255, 0.8);
+    --card-bg: #ffffff;
+    --border-color: rgba(5, 80, 50, 0.12);
+    --border-color-active: rgba(5, 80, 50, 0.4);
 
-    --text-primary: #1a1f2e;
-    --text-secondary: #4a5568;
-    --text-muted: #718096;
+    --text-primary: #121212;
+    --text-secondary: #5a5a5d;
+    --text-muted: #8E8E93;
 
-    --accent-primary: #10b981;
-    /* Emerald 500 */
-    --accent-secondary: #059669;
-    /* Emerald 600 */
-    --accent-tertiary: #34d399;
-    /* Emerald 400 */
-    --accent-teal: #14b8a6;
-    /* Teal 500 */
-    --accent-blue: #0ea5e9;
-    /* Sky 500 */
-    --accent-amber: #f59e0b;
-    /* Amber 500 */
-    --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    --accent-primary: #059669; /* Forest Green */
+    --accent-secondary: #121212; /* Dark contrast */
+    --accent-tertiary: #c026d3; /* Magenta */
+    --accent-danger: #DC2626; /* Crimson Red */
+    
+    --accent-teal: #0d9488;
+    --accent-blue: #2563eb;
+    --accent-amber: #d97706;
 
-    --border-glass: rgba(16, 185, 129, 0.4);
-    --border-glass-light: rgba(16, 185, 129, 0.25);
+    --border-glass: rgba(18, 18, 18, 0.15);
+    --border-glass-light: rgba(18, 18, 18, 0.08);
 
-    --shadow-glass: rgba(6, 95, 70, 0.15);
-    --shadow-glass-strong: rgba(6, 95, 70, 0.25);
+    --shadow-glass: rgba(0, 0, 0, 0.02);
+    --shadow-glass-strong: rgba(0, 0, 0, 0.05);
 
-    --card-shadow: 0 8px 32px rgba(6, 95, 70, 0.15);
-    --card-shadow-hover: 0 12px 48px rgba(6, 95, 70, 0.2);
+    --card-shadow: none;
+    --card-shadow-hover: none;
 
-    --toggle-bg: rgba(255, 255, 255, 0.7);
-    --toggle-border: rgba(16, 185, 129, 0.3);
+    --toggle-bg: #ffffff;
+    --toggle-border: rgba(18, 18, 18, 0.2);
 
-    /* Theme-specific Diagram Variables (Light) */
-    --diagram-bg: #f8fafc; /* Slate 50 */
-    --diagram-border: #cbd5e1; /* Slate 300 */
-    --diagram-text-title: #0f172a; /* Slate 900 */
-    --diagram-text-subtitle: #475569; /* Slate 600 */
-    --diagram-label: #334155; /* Slate 700 */
-    --diagram-wire-line: #cbd5e1; /* Slate 300 line */
-    --diagram-wire-label: #475569;
-    --diagram-assert-label: #059669; /* Darker green for accessibility */
+    /* Sidebar Variables (Light Green Theme) */
+    --sidebar-bg: #c8e8d4;
+    --sidebar-border: rgba(5, 150, 105, 0.3);
+    --sidebar-text: #065f46;
+    --sidebar-text-active: #022c22;
+
+    /* Diagram Variables (Light) */
+    --diagram-bg: #ffffff;
+    --diagram-border: rgba(18, 18, 18, 0.15);
+    --diagram-text-title: #121212;
+    --diagram-text-subtitle: #5a5a5d;
+    --diagram-label: #121212;
+    --diagram-wire-line: rgba(18, 18, 18, 0.2);
+    --diagram-wire-label: #5a5a5d;
+    --diagram-assert-label: #059669;
 }
 
 [data-theme='dark'] {
-    /* Dark Mode */
-    --bg-primary: #020617;
-    /* Slate 950 - Deeper black/blue */
-    --bg-secondary: #0f172a;
-    /* Slate 900 */
-    --bg-gradient: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    /* Dark Mode — dark charcoal with green undertone, not pure black */
+    --bg-primary: #1a201e;
+    --bg-secondary: #1e2824;
+    --bg-gradient: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
 
-    --glass-bg: rgba(2, 6, 23, 0.7);
-    --glass-bg-hover: rgba(15, 23, 42, 0.8);
-    --glass-bg-card: rgba(2, 6, 23, 0.6);
-    --glass-bg-sidebar: rgba(2, 6, 23, 0.85);
+    --card-bg: #1e2824;
+    --border-color: rgba(255, 251, 235, 0.15);
+    --border-color-active: rgba(255, 251, 235, 0.45);
 
-    --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-primary: #FFFBEB; /* Warm Cream Text */
+    --text-secondary: #9A9A9E;
+    --text-muted: #5a5a5d;
 
-    --accent-primary: #34d399;
-    /* Emerald 400 for Dark Mode */
-    --accent-secondary: #10b981;
-    /* Emerald 500 */
-    --accent-tertiary: #6ee7b7;
-    /* Emerald 300 */
+    --accent-primary: #10B981; /* Phosphor Green */
+    --accent-secondary: #FFFBEB; /* Off-white contrast */
+    --accent-tertiary: #ec4899; /* Magenta */
+    --accent-danger: #EF4444; /* Bright Red */
+    
     --accent-teal: #2dd4bf;
-    /* Teal 400 */
-    --accent-blue: #38bdf8;
-    /* Sky 400 */
-    --accent-amber: #fbbf24;
-    /* Amber 400 */
-    --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    --accent-blue: #3b82f6;
+    --accent-amber: #f59e0b;
 
-    --border-glass: rgba(16, 185, 129, 0.3);
-    --border-glass-light: rgba(16, 185, 129, 0.15);
+    --border-glass: rgba(255, 251, 235, 0.15);
+    --border-glass-light: rgba(255, 251, 235, 0.08);
 
-    --shadow-glass: rgba(0, 0, 0, 0.3);
-    --shadow-glass-strong: rgba(0, 0, 0, 0.5);
+    --shadow-glass: rgba(0, 0, 0, 0.2);
+    --shadow-glass-strong: rgba(0, 0, 0, 0.4);
 
-    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    --card-shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.5);
+    --card-shadow: none;
+    --card-shadow-hover: none;
 
-    --toggle-bg: rgba(15, 23, 42, 0.6);
-    --toggle-border: rgba(16, 185, 129, 0.3);
+    --toggle-bg: #1e2824;
+    --toggle-border: rgba(255, 251, 235, 0.2);
 
-    /* Theme-specific Diagram Variables (Dark) */
-    --diagram-bg: #0b0f19; /* Slate 950 */
-    --diagram-border: rgba(255, 255, 255, 0.04);
-    --diagram-text-title: #ffffff;
-    --diagram-text-subtitle: #94a3b8;
-    --diagram-label: #94a3b8;
-    --diagram-wire-line: rgba(16, 185, 129, 0.3);
-    --diagram-wire-label: #94a3b8;
-    --diagram-assert-label: #34d399;
+    /* Sidebar Variables — deep emerald, not bottle green */
+    --sidebar-bg: #0d4a30;
+    --sidebar-border: rgba(52, 211, 153, 0.25);
+    --sidebar-text: #a7f3d0;
+    --sidebar-text-active: #ffffff;
+
+    /* Diagram Variables (Dark) */
+    --diagram-bg: #151515;
+    --diagram-border: rgba(255, 251, 235, 0.1);
+    --diagram-text-title: #FFFBEB;
+    --diagram-text-subtitle: #9A9A9E;
+    --diagram-label: #FFFBEB;
+    --diagram-wire-line: rgba(255, 251, 235, 0.2);
+    --diagram-wire-label: #9A9A9E;
+    --diagram-assert-label: #10B981;
 }
 
 html {
@@ -114,80 +112,159 @@ html {
 body {
     background: var(--bg-gradient);
     color: var(--text-primary);
-    transition: background 0.3s ease, color 0.3s ease;
+    transition: background 0.2s ease, color 0.2s ease;
     min-height: 100vh;
     margin: 0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    letter-spacing: -0.01em;
+    font-family: 'Fira Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: 0.01em;
     background-attachment: fixed;
 }
 
-/* Glassmorphism Components */
-.glass-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    border: 1px solid var(--border-glass-light);
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+/* Technical HUD Cards and Panels */
+.grid-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0; /* Sharp corners */
+    position: relative;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
-.glass-panel:hover {
-    box-shadow: var(--card-shadow-hover);
-    border-color: var(--border-glass);
+.grid-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0; /* Sharp corners */
+    padding: 16px;
+    position: relative;
+}
+
+/* Compatibility mapping to maintain functionality with glass class names */
+.glass-panel {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    position: relative;
 }
 
 .glass-card {
-    background: var(--glass-bg-card);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid var(--border-glass-light);
-    border-radius: 8px;
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     padding: 16px;
-    box-shadow: var(--shadow-glass) 0px 4px 12px;
+    position: relative;
 }
 
-.glass-input {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-glass-light);
-    border-radius: 6px;
+/* Corner Bracket Ticks (HUD visual markers) */
+.corner-tick {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-color: var(--text-primary);
+    border-style: solid;
+    pointer-events: none;
+}
+.corner-tick-tl { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+.corner-tick-tr { top: -1px; right: -1px; border-width: 1px 1px 0 0; }
+.corner-tick-bl { bottom: -1px; left: -1px; border-width: 0 0 1px 1px; }
+.corner-tick-br { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+
+.glass-panel::before, .grid-panel::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px; width: 6px; height: 6px;
+    border-top: 1px solid var(--text-primary);
+    border-left: 1px solid var(--text-primary);
+    pointer-events: none;
+    z-index: 2;
+}
+.glass-panel::after, .grid-panel::after {
+    content: '';
+    position: absolute;
+    top: -1px; right: -1px; width: 6px; height: 6px;
+    border-top: 1px solid var(--text-primary);
+    border-right: 1px solid var(--text-primary);
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Flat Grid Technical Inputs */
+.glass-input, .grid-input {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 0 !important; /* Sharp corners */
     color: var(--text-primary);
     padding: 8px 12px;
     outline: none;
     font-size: 14px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
-.glass-input:focus {
-    border-color: var(--border-glass);
-    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+.glass-input:focus, .grid-input:focus {
+    border-color: var(--border-color-active);
+    background: rgba(255, 255, 255, 0.02);
 }
 
-.btn-quantum {
-    background: var(--accent-gradient);
-    color: #ffffff;
-    border: none;
+/* Flat HUD Buttons */
+.btn-quantum, .btn-flat {
+    background: var(--accent-secondary);
+    color: var(--bg-primary);
+    border: 1px solid var(--accent-secondary);
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 0 !important; /* Sharp corners */
+    font-weight: 600;
+    font-family: 'Fira Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-quantum:hover, .btn-flat:hover {
+    background: transparent;
+    color: var(--accent-secondary);
+}
+
+.btn-quantum:active, .btn-flat:active {
+    opacity: 0.8;
+}
+
+.btn-quantum:disabled, .btn-flat:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: var(--border-color);
+    border-color: var(--border-color);
+    color: var(--text-muted);
+}
+
+/* Secondary Button outline style */
+.btn-secondary-flat {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 0;
     font-weight: 500;
     cursor: pointer;
-    transition: opacity 0.2s ease, transform 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.btn-quantum:hover {
-    opacity: 0.9;
-}
-
-.btn-quantum:active {
-    transform: scale(0.98);
-}
-
-.btn-quantum:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+.btn-secondary-flat:hover {
+    background: var(--border-color);
 }
 
 .code-font {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
 }
+

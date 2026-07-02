@@ -1,17 +1,17 @@
-<!-- Home Landing Page - Simple visual layout matching user request -->
 <div class="home-container">
 
-  <!-- Header with Logo and Title -->
+  <!-- Header with Original Logo and Refined Title -->
   <header class="home-header">
-    <!-- Circular container for the logo, which will be animated -->
     <div class="logo-circle-container">
       <svg class="logo-svg-animated" viewBox="0 0 24 24" width="60" height="60">
         <!-- Checkmark representing Test/Verify -->
-        <path class="logo-path-check" d="M8 12L11 15L16 9" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-        
+        <path class="logo-path-check" d="M8 12L11 15L16 9" fill="none" stroke="var(--accent-primary)" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" />
+
         <!-- Outer dashed orbit (from QuMu style) -->
-        <circle class="logo-circle-dashed" cx="12" cy="12" r="8" fill="none" stroke="var(--accent-primary)" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.6" />
-        
+        <circle class="logo-circle-dashed" cx="12" cy="12" r="8" fill="none" stroke="var(--accent-primary)"
+          stroke-width="1.5" stroke-dasharray="2 3" opacity="0.6" />
+
         <!-- Corner particles (from QuMu style) -->
         <circle class="logo-dot logo-dot-1" cx="5" cy="5" r="1.5" fill="var(--accent-primary)" />
         <circle class="logo-dot logo-dot-2" cx="19" cy="5" r="1.5" fill="var(--accent-primary)" />
@@ -19,39 +19,54 @@
         <circle class="logo-dot logo-dot-4" cx="19" cy="19" r="1.5" fill="var(--accent-primary)" />
       </svg>
     </div>
-    <h1 class="main-title">QuTe: Quantum Testing</h1>
-    <p class="main-subtitle">Design, simulate, and verify quantum circuit behavior</p>
+    <h1 class="main-title"
+      style="font-family: 'Fira Sans', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+      QuTe: Quantum Testing</h1>
+    <p class="main-subtitle"
+      style="font-family: 'Fira Sans', sans-serif; font-size: 14px; color: var(--text-secondary); margin: 0;">Design,
+      simulate, and verify quantum circuit behavior</p>
   </header>
 
   <!-- Two Column Grid Content -->
   <main class="grid-content">
-    
-    <!-- Left Column: Explanatory Text Card (Focused on writing and executing test cases) -->
-    <section class="glass-card info-card">
-      <div class="card-header">
-        <svg class="info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="16" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
-        <h3>About Quantum Test Suites</h3>
+
+    <!-- Left Column: Informational Card -->
+    <section style="display: flex; flex-direction: column; height: 100%;">
+
+      <!-- Informational Text Card (QuTe Overview) -->
+      <div class="glass-card">
+        <div class="card-header"
+          style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 16px;">
+          <i class="fas fa-info-circle" style="color: var(--accent-primary);"></i>
+          <h3
+            style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; font-family: 'Fira Code', monospace; margin: 0;">
+            [ OVERVIEW ]</h3>
+        </div>
+        <p style="font-size: 14px; line-height: 1.7; color: var(--text-secondary); margin: 0 0 14px 0;">
+          QuTe is an advanced engineering framework for designing, simulating, and verifying quantum circuit test
+          suites. You can specify deterministic test cases to confirm exact state transitions, or build stochastic
+          assertions to validate state probability distributions.
+        </p>
+        <p style="font-size: 14px; line-height: 1.7; color: var(--text-secondary); margin: 0;">
+          Deterministic test cases define a classical input bitstring and the expected output state after the circuit
+          runs, letting you confirm gate correctness step by step. Stochastic test cases let you declare the
+          probability that each basis state should appear in measurement results, making it possible to verify
+          superposition and entanglement behaviour against precise statistical thresholds.
+        </p>
       </div>
-      
-      <p class="info-text">
-        QuTe is a framework for designing and executing test suites on quantum circuits. Easily define deterministic test cases to verify exact state transitions, or stochastic test cases to validate expected probability distributions.
-      </p>
-      <p class="info-text">
-        Powered by Qiskit Aer, QuTe automatically simulates your circuits and supports mutation analysis by injecting controlled logical faults to evaluate the robustness of your test suites.
-      </p>
 
     </section>
 
-    <!-- Right Column: Visual Diagram Card (Focused on Deterministic vs Stochastic Test Execution) -->
+    <!-- Right Column: Visual Diagram Card -->
     <div class="inner-diagram-container">
-      
-      <div class="diagram-title-block">
-        <h4>Quantum Test Case Execution</h4>
-        <p>Validating circuit outputs through deterministic and stochastic assertions</p>
+
+      <div class="diagram-title-block"
+        style="border-bottom: 1px solid var(--diagram-border); padding-bottom: 8px; margin-bottom: 10px;">
+        <h4
+          style="font-family: 'Fira Sans', sans-serif; text-transform: uppercase; font-size: 14px; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <i class="fas fa-project-diagram" style="color: var(--accent-primary);"></i>
+          [ SIMULATOR SCHEMATICS ]
+        </h4>
       </div>
 
       <!-- Visual Circuit Comparison -->
@@ -59,9 +74,10 @@
         <!-- Row 1: Deterministic Test Wire -->
         <div class="comparison-row block-row">
           <div class="row-header">
-            <span class="row-label text-original">DETERMINISTIC</span>
+            <span class="row-label text-original" style="font-size: 11px;">[ DET_TEST ]</span>
             <div class="status-circle circle-success">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
@@ -87,9 +103,10 @@
         <!-- Row 2: Stochastic Test Wire -->
         <div class="comparison-row block-row">
           <div class="row-header">
-            <span class="row-label text-stochastic">STOCHASTIC</span>
+            <span class="row-label text-stochastic" style="font-size: 11px;">[ STOCH_TEST ]</span>
             <div class="status-circle circle-success">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
@@ -100,14 +117,14 @@
               <span class="wire-state-label">q[0]: |0⟩</span>
               <div class="gate-box gate-h">H</div>
               <div class="gate-box gate-m">M</div>
-              <span class="wire-assert-label">Assert: |00⟩: 50%</span>
+              <span class="wire-assert-label" style="color: var(--accent-blue);">Assert: 50%</span>
             </div>
             <!-- Qubit 1 -->
             <div class="diagram-wire">
               <span class="wire-state-label">q[1]: |0⟩</span>
               <div class="gate-box gate-cx">CX</div>
               <div class="gate-box gate-m">M</div>
-              <span class="wire-assert-label">Assert: |11⟩: 50%</span>
+              <span class="wire-assert-label" style="color: var(--accent-blue);">Assert: 50%</span>
             </div>
           </div>
         </div>
@@ -118,38 +135,19 @@
 
   <!-- Primary Action CTAs -->
   <div class="action-buttons">
-    <button class="btn-primary-launch" (click)="createCircuit()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <button class="btn-primary-launch" (click)="createCircuit()" style="font-family: 'Fira Sans', sans-serif;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        style="margin-right: 6px;">
         <line x1="12" y1="5" x2="12" y2="19"></line>
         <line x1="5" y1="12" x2="19" y2="12"></line>
       </svg>
       <span>Start Creating</span>
     </button>
-    
-    <button *ngIf="!isLoggedIn()" class="btn-secondary-login" (click)="navigateToLogin()">
+
+    <button *ngIf="!isLoggedIn()" class="btn-secondary-login" (click)="navigateToLogin()"
+      style="font-family: 'Fira Sans', sans-serif;">
       <span>Log In</span>
     </button>
   </div>
-
-  <!-- Section for Active Projects (Minimal display at bottom) -->
-  <section class="active-projects-section" *ngIf="circuits.length > 0">
-    <div class="projects-divider">
-      <span>Your Active Projects</span>
-    </div>
-    
-    <div class="projects-horizontal-list">
-      <div class="project-mini-card" *ngFor="let proj of circuits" (click)="selectCircuit(proj)">
-        <div class="project-mini-info">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-          </svg>
-          <span class="project-mini-name">{{ proj.name || 'Untitled Project' }}</span>
-        </div>
-        <svg class="chevron-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-      </div>
-    </div>
-  </section>
 
 </div>

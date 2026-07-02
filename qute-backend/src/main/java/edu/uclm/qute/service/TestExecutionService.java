@@ -135,7 +135,9 @@ public class TestExecutionService {
             // Determine verdict
             boolean ok;
             if (expectedPercent != null && errorRange != null) {
-                ok = percent >= (expectedPercent - errorRange);
+                // Must be within [expectedPercent - errorRange, expectedPercent + errorRange]
+                ok = percent >= (expectedPercent - errorRange)
+                  && percent <= (expectedPercent + errorRange);
             } else if (expectedPercent != null) {
                 ok = percent >= expectedPercent;
             } else {

@@ -25,11 +25,6 @@
         </h2>
       </div>
     </div>
-    <div class="project-actions">
-      <button class="btn-danger" (click)="deleteProject()">
-        <i class="fas fa-trash"></i> Delete Project
-      </button>
-    </div>
   </div>
 
   <!-- Circuit & Editor Content -->
@@ -107,13 +102,28 @@
     </div>
 
     <div class="button-row" style="display: flex; gap: 12px; margin-bottom: 8px;">
-      <button class="btn-quantum" (click)="visualizeCircuit()" [disabled]="!quirkCodeText.trim()" style="background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-tertiary) 100%);">
+      <button class="btn-flat" (click)="visualizeCircuit()" [disabled]="!quirkCodeText.trim()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; display: inline-block; vertical-align: middle;">
           <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" stroke-width="2" />
           <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke="currentColor" stroke-width="2" />
         </svg>
         Visualize in Quirk
         <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Danger Zone -->
+  <div class="glass-panel danger-zone-panel">
+    <h3 style="margin-top: 0; color: var(--accent-danger); display: flex; align-items: center; gap: 8px; font-family: 'Fira Sans', sans-serif;">
+      <i class="fas fa-exclamation-triangle"></i> Danger Zone
+    </h3>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+      Permanently delete this project and all of its associated test suites. This action is irreversible.
+    </p>
+    <div style="display: flex; justify-content: flex-start;">
+      <button class="btn-danger-flat" (click)="deleteProject()">
+        <i class="fas fa-trash" style="margin-right: 6px;"></i> Delete Project
       </button>
     </div>
   </div>

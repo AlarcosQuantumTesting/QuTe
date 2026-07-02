@@ -3,6 +3,7 @@
     max-width: 1200px;
     margin: 0 auto;
     color: var(--text-primary);
+    font-family: 'Fira Sans', sans-serif;
 }
 
 .workspace-header {
@@ -13,7 +14,7 @@
     gap: 16px;
 }
 
-/* Project Name */
+/* Project Name Renaming HUD style */
 .project-name-wrapper {
     display: flex;
     align-items: center;
@@ -21,18 +22,18 @@
 
 .project-name-display {
     margin: 0;
-    color: var(--accent-primary);
+    color: var(--text-primary);
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    border-radius: 6px;
+    border-radius: 0;
     padding: 4px 8px;
-    transition: background 0.2s ease;
+    transition: background 0.15s ease;
 }
 
 .project-name-display:hover {
-    background: rgba(16, 185, 129, 0.08);
+    background: var(--border-color);
 }
 
 .project-name-display:hover .name-edit-icon {
@@ -41,60 +42,46 @@
 
 .name-edit-icon {
     font-size: 13px;
-    opacity: 0;
-    color: var(--text-secondary);
-    transition: opacity 0.2s ease;
+    opacity: 0.3;
+    color: var(--text-muted);
 }
 
 .project-name-input {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1.5px solid var(--accent-primary);
-    border-radius: 8px;
-    color: var(--accent-primary);
+    background: transparent;
+    border: 1px solid var(--text-primary);
+    border-radius: 0;
+    color: var(--text-primary);
     font-size: 1.5rem;
     font-weight: 700;
     padding: 4px 12px;
     outline: none;
     min-width: 220px;
-    font-family: 'JetBrains Mono', monospace;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
-    transition: box-shadow 0.2s ease;
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    transition: box-shadow 0.15s ease;
 }
 
-.project-name-input:focus {
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25);
-}
-
-/* Delete Button */
-.btn-danger {
-    display: flex;
+/* Danger Zone Flat Button */
+.btn-danger-flat {
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 9px 18px;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.2) 100%);
-    border: 1px solid rgba(239, 68, 68, 0.35);
-    color: #ef4444;
-    border-radius: 10px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--accent-danger);
+    color: var(--accent-danger);
+    border-radius: 0;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
-.btn-danger:hover {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-    border-color: #ef4444;
-    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
-    transform: translateY(-1px);
+.btn-danger-flat:hover {
+    background: var(--accent-danger);
+    color: var(--bg-primary);
 }
 
-/* Circuit panel */
-.circuit-panel {
-    background: var(--glass-bg);
-}
-
-/* Form Styles */
+/* Form Layout */
 label {
     color: var(--text-secondary);
     font-weight: 500;
@@ -103,19 +90,29 @@ label {
 textarea {
     width: 100%;
     box-sizing: border-box;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
     font-size: 13px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    color: var(--text-primary);
+    padding: 12px;
+    transition: border-color 0.2s ease;
 }
 
-/* Animations */
+textarea:focus {
+    border-color: var(--border-color-active);
+    outline: none;
+}
+
 .fade-in {
-    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(6px);
     }
     to {
         opacity: 1;
@@ -123,83 +120,51 @@ textarea {
     }
 }
 
-/* Qubit Checkboxes Layout */
+/* Qubit Checkboxes styled as flat key tags [ Q0 ] */
 .output-qubits-inline {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem;
-    padding: 0.4rem 0.5rem;
-    background: var(--glass-bg, rgba(255, 255, 255, 0.05));
-    border: 1px solid var(--border-glass-light, rgba(16, 185, 129, 0.12));
-    border-radius: 6px;
-    min-height: 28px;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
-    transition: border-color 0.3s ease, background-color 0.3s ease;
+    gap: 6px;
+    padding: 8px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    min-height: 38px;
+    transition: border-color 0.2s ease;
 }
 
 .qubit-checkbox {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.2rem 0.5rem;
-    background: var(--glass-bg-card, #ffffff);
-    border: 1px solid var(--border-glass-light, rgba(0, 0, 0, 0.06));
-    border-radius: 4px;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 0;
     cursor: pointer;
-    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-    font-size: 0.72rem;
+    transition: all 0.15s ease;
+    font-size: 13px;
     font-weight: 600;
-    color: var(--text-primary, #374151);
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    color: var(--text-secondary);
     user-select: none;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.01);
 }
 
 .qubit-checkbox:hover {
-    background: var(--glass-bg-hover, rgba(16, 185, 129, 0.03));
-    border-color: rgba(16, 185, 129, 0.3);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.06);
+    border-color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .qubit-checkbox:has(.glass-checkbox:checked) {
-    border-color: var(--accent-primary, #10b981);
-    background: rgba(16, 185, 129, 0.06);
-    color: var(--accent-primary, #10b981);
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.05);
+    border-color: var(--accent-primary);
+    background: var(--accent-primary);
+    color: var(--bg-primary) !important;
 }
 
-/* Custom Checkbox */
+/* Hide native checkbox component completely */
 .glass-checkbox {
-    appearance: none;
-    width: 10px;
-    height: 10px;
-    border: 1.5px solid rgba(16, 185, 129, 0.4);
-    border-radius: 2.5px;
-    background: var(--glass-bg-card, #ffffff);
-    cursor: pointer;
-    position: relative;
-    transition: all 150ms ease;
-}
-
-.qubit-checkbox:hover .glass-checkbox {
-    border-color: var(--accent-primary, #10b981);
-}
-
-.glass-checkbox:checked {
-    background: var(--accent-primary, #10b981);
-    border-color: var(--accent-primary, #10b981);
-}
-
-.glass-checkbox:checked::after {
-    content: '';
-    position: absolute;
-    left: 2.5px;
-    top: -1px;
-    width: 2px;
-    height: 4.5px;
-    border: solid white;
-    border-width: 0 1.5px 1.5px 0;
-    transform: rotate(45deg);
+    display: none;
 }
 
 /* Select All Button */
@@ -207,20 +172,43 @@ textarea {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.35rem 0.85rem;
-    font-size: 0.8rem;
-    border-radius: 6px;
-    background: var(--glass-bg-card, #ffffff);
-    border: 1px solid var(--border-glass-light, rgba(0, 0, 0, 0.08));
-    color: var(--text-secondary, #475569);
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 0;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     font-weight: 500;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
     cursor: pointer;
-    transition: all 200ms ease;
+    transition: all 0.15s ease;
 }
 
 .select-all-btn.small-btn:hover {
-    border-color: var(--accent-primary, #10b981);
-    color: var(--accent-primary, #10b981);
-    background: var(--glass-bg-hover, rgba(16, 185, 129, 0.04));
+    border-color: var(--border-color-active);
+    background: var(--border-color);
+}
+
+/* Danger Zone Container */
+.danger-zone-panel {
+    margin-top: 32px;
+    padding: 24px;
+    border: 1px solid var(--accent-danger) !important;
+    background: transparent;
+    position: relative;
+}
+
+.danger-zone-panel::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px; width: 6px; height: 6px;
+    border-top: 1px solid var(--accent-danger);
+    border-left: 1px solid var(--accent-danger);
+}
+
+.danger-zone-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: -1px; width: 6px; height: 6px;
+    border-bottom: 1px solid var(--accent-danger);
+    border-right: 1px solid var(--accent-danger);
 }

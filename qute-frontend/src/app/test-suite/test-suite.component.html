@@ -1,35 +1,36 @@
 <div class="suite-container fade-in" *ngIf="project">
-
-  <!-- Suite Header -->
-  <div class="suite-header glass-panel">
-    <div class="suite-title">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="color: var(--accent-primary);">
-        <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <div>
-        <h2 style="margin:0; font-size:1.25rem;">Test Suite {{ suiteIndex + 1 }}</h2>
-        <span class="text-muted" style="font-size:12px;">{{ project.name }}</span>
-      </div>
-    </div>
-    <div class="suite-actions">
-      <!-- Section Toggle -->
-      <div class="section-toggle">
-        <button class="toggle-btn" [class.active]="activeSection === 'config'" (click)="activeSection = 'config'">
-          <i class="fas fa-sliders-h"></i> Configure
-        </button>
-        <button class="toggle-btn" [class.active]="activeSection === 'results'" (click)="activeSection = 'results'"
-                [disabled]="!testRunSuccess">
-          <i class="fas fa-chart-bar"></i> Results
-          <span *ngIf="testRunSuccess" class="results-dot"></span>
-        </button>
-      </div>
-      <!-- Run Tests -->
-      <button class="btn-run" (click)="runTests()" [disabled]="isRunningTests || isConverting">
-        <i class="fas" [ngClass]="isRunningTests ? 'fa-spinner fa-spin' : 'fa-play'"></i>
-        {{ isRunningTests ? 'Running...' : 'Run Tests' }}
-      </button>
-    </div>
-  </div>
+ 
+   <!-- Suite Header -->
+   <div class="suite-header glass-panel">
+     <div class="suite-title">
+       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color: var(--accent-primary); margin-right: 8px;">
+         <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+       </svg>
+       <div>
+         <h2 style="margin:0; font-size:1.25rem; font-family: 'Fira Sans', sans-serif;">Test Suite {{ suiteIndex + 1 }}</h2>
+         <span class="text-muted" style="font-size:12px;">{{ project.name }}</span>
+       </div>
+     </div>
+     <div class="suite-actions">
+       <!-- Run Tests -->
+       <button class="btn-run" (click)="runTests()" [disabled]="isRunningTests || isConverting">
+         <i class="fas" [ngClass]="isRunningTests ? 'fa-spinner fa-spin' : 'fa-play'"></i>
+         {{ isRunningTests ? 'Running...' : 'Run Tests' }}
+       </button>
+     </div>
+   </div>
+ 
+   <!-- Flat Grid Navigation Tabs -->
+   <div class="suite-tabs-nav">
+     <button class="suite-tab-link" [class.active]="activeSection === 'config'" (click)="activeSection = 'config'">
+       <i class="fas fa-sliders-h"></i> Configure
+     </button>
+     <button class="suite-tab-link" [class.active]="activeSection === 'results'" (click)="activeSection = 'results'"
+             [disabled]="!testRunSuccess">
+       <i class="fas fa-chart-bar"></i> Results
+       <span *ngIf="testRunSuccess" class="results-dot"></span>
+     </button>
+   </div>
 
   <!-- CONFIG SECTION -->
   <div *ngIf="activeSection === 'config'" class="section-content">
@@ -100,12 +101,12 @@
       <div *ngIf="testSuiteType === 'DETERMINISTIC' && testCases.length > 0" class="table-container" style="overflow-x:auto;">
         <table style="width:100%; border-collapse:collapse; text-align:left;">
           <thead>
-            <tr style="border-bottom: 1px solid var(--border-glass-light); color: var(--text-secondary);">
+            <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary);">
               <th style="padding:8px 4px; width:40px; text-align:center; font-size:14px;">#</th>
               <th *ngFor="let idx of inputQubitsIndicesList"
-                  style="padding:8px 4px; text-align:center; font-size:14px; color:#10b981;">q{{ idx }}</th>
+                  style="padding:8px 4px; text-align:center; font-size:14px; color: var(--accent-primary);">q{{ idx }}</th>
               <th *ngFor="let idx of outputQubitsIndicesList"
-                  style="padding:8px 4px; text-align:center; font-size:14px; color:#0ea5e9;">q{{ idx }}</th>
+                  style="padding:8px 4px; text-align:center; font-size:14px; color: var(--accent-blue);">q{{ idx }}</th>
               <th style="padding:8px 4px; text-align:center; width:80px; font-size:14px;">Actions</th>
             </tr>
           </thead>
