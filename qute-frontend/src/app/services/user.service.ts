@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, Subscription, tap, BehaviorSubject, of, catchError, map } from 'rxjs';
 import { ReperService } from './reper.service';
+import { UserProfile } from '../model/UserProfile';
 import { environment } from '../../environments/environment';
 import * as localforage from 'localforage';
 import { shareReplay } from 'rxjs/operators';
@@ -14,9 +15,14 @@ export class UserService {
   public login$ = new Subject<void>();
 
   public isAuthenticated$ = new BehaviorSubject<boolean>(false);
+  public currentUserProfile$ = new BehaviorSubject<UserProfile | null>(null);
   private sessionCache$: Observable<boolean> | null = null;
 
   constructor(private client: HttpClient, private reperService: ReperService) { }
+
+  get currentUserProfile(): UserProfile | null {
+    return this.currentUserProfile$.value;
+  }
 
   login(email: string, pwd: string): Observable<any> {
     return this.client.post<string>(`${environment.api.core}/users/login`, { email, pwd }, { responseType: 'text' as 'json', withCredentials: true })
@@ -37,14 +43,18 @@ export class UserService {
     }
 
     this.sessionCache$ = this.reperService.getUser().pipe(
-      tap(email => {
-        sessionStorage.setItem('email', email);
-        this.isAuthenticated$.next(true);
+      tap(user => {
+        if (user && user.email) {
+          sessionStorage.setItem('email', user.email);
+          this.isAuthenticated$.next(true);
+          this.currentUserProfile$.next(user);
+        } else {
+          this.clearSession();
+        }
       }),
-      map(() => true),
+      map(user => !!(user && user.email)),
       catchError(() => {
-        this.isAuthenticated$.next(false);
-        sessionStorage.removeItem('email');
+        this.clearSession();
         return of(false);
       }),
       shareReplay(1)
@@ -69,6 +79,7 @@ export class UserService {
   private clearSession(): void {
     sessionStorage.removeItem('email');
     this.isAuthenticated$.next(false);
+    this.currentUserProfile$.next(null);
     this.sessionCache$ = null;
 
     // Clear all cached projects from localforage

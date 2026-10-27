@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Project } from '../model/Project';
+import { UserProfile } from '../model/UserProfile';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -67,12 +68,17 @@ export class ReperService {
     return this.client.post<any>(`${environment.api.core}/qumureper/deleteMutantCycle`, { projectId, cycleId }, { withCredentials: true })
   }
 
-  getUser() {
-    return this.client.post<string>(`${environment.api.core}/users/getUser`, {}, {
-      withCredentials: true,
-      responseType: 'text' as 'json'
+  getUser(): Observable<UserProfile | null> {
+    return this.client.post<UserProfile | null>(`${environment.api.core}/users/getUser`, {}, {
+      withCredentials: true
     }).pipe(
-      tap(user => sessionStorage.setItem('email', user))
+      tap(user => {
+        if (user && user.email) {
+          sessionStorage.setItem('email', user.email);
+        } else {
+          sessionStorage.removeItem('email');
+        }
+      })
     );
   }
 

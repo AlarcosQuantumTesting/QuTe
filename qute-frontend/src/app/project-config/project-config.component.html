@@ -5,21 +5,11 @@
     <div class="project-info">
       <!-- Editable project name -->
       <div class="project-name-wrapper">
-        <input
-          *ngIf="editingName"
-          class="project-name-input code-font"
-          [(ngModel)]="projectNameCache"
-          (blur)="saveProjectName()"
-          (keyup.enter)="saveProjectName()"
-          (keyup.escape)="cancelNameEdit()"
-          #nameInput
-          autofocus
-          placeholder="Project name..."
-        >
-        <h2 *ngIf="!editingName"
-            class="code-font project-name-display"
-            (click)="startNameEdit()"
-            title="Click to rename">
+        <input *ngIf="editingName" class="project-name-input code-font" [(ngModel)]="projectNameCache"
+          (blur)="saveProjectName()" (keyup.enter)="saveProjectName()" (keyup.escape)="cancelNameEdit()" #nameInput
+          autofocus placeholder="Project name...">
+        <h2 *ngIf="!editingName" class="code-font project-name-display" (click)="startNameEdit()"
+          title="Click to rename">
           {{ project.name }}
           <i class="fas fa-pen name-edit-icon"></i>
         </h2>
@@ -30,7 +20,8 @@
   <!-- Circuit & Editor Content -->
   <div class="glass-panel circuit-panel" style="margin-top: 16px; padding: 24px;">
     <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
-      <svg class="quantum-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: var(--accent-primary);">
+      <svg class="quantum-icon" width="22" height="22" viewBox="0 0 24 24" fill="none"
+        xmlns="http://www.w3.org/2000/svg" style="color: var(--accent-primary);">
         <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
         <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.5" />
         <circle cx="12" cy="12" r="10.5" stroke="currentColor" stroke-width="1" stroke-dasharray="1 2" opacity="0.3" />
@@ -39,13 +30,16 @@
     </h3>
 
     <!-- Qubit Selection (Input/Output) -->
-    <div class="config-row-qubits" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+    <div class="config-row-qubits"
+      style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
       <!-- Input Qubits -->
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <div class="config-label-header" style="display: flex; justify-content: space-between; align-items: center;">
-          <label style="font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
+          <label
+            style="font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: var(--accent-primary);">
-              <path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
             </svg>
             Input Qubits
           </label>
@@ -56,7 +50,8 @@
 
         <div class="output-qubits-inline">
           <label *ngFor="let qubitIndex of qubitsIndices" class="qubit-checkbox">
-            <input type="checkbox" [(ngModel)]="inputQubitsSelection[qubitIndex]" (change)="updateInputQubits()" class="glass-checkbox">
+            <input type="checkbox" [(ngModel)]="inputQubitsSelection[qubitIndex]" (change)="updateInputQubits()"
+              class="glass-checkbox">
             <span>Q{{ qubitIndex }}</span>
           </label>
           <div *ngIf="qubitsIndices.length === 0" class="text-muted" style="font-size: 13px; padding: 4px 8px;">
@@ -68,9 +63,11 @@
       <!-- Output Qubits -->
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <div class="config-label-header" style="display: flex; justify-content: space-between; align-items: center;">
-          <label style="font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
+          <label
+            style="font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: var(--accent-primary);">
-              <path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
             </svg>
             Output Qubits
           </label>
@@ -81,7 +78,8 @@
 
         <div class="output-qubits-inline">
           <label *ngFor="let qubitIndex of qubitsIndices" class="qubit-checkbox">
-            <input type="checkbox" [(ngModel)]="outputQubitsSelection[qubitIndex]" (change)="updateOutputQubits()" class="glass-checkbox">
+            <input type="checkbox" [(ngModel)]="outputQubitsSelection[qubitIndex]" (change)="updateOutputQubits()"
+              class="glass-checkbox">
             <span>Q{{ qubitIndex }}</span>
           </label>
           <div *ngIf="qubitsIndices.length === 0" class="text-muted" style="font-size: 13px; padding: 4px 8px;">
@@ -93,19 +91,26 @@
 
     <div style="display: flex; flex-direction: column; margin-bottom: 20px;">
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: var(--accent-primary);">
-          <path d="M8 6L4 12L8 18M16 6L20 12L16 18M14 4L10 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+          style="color: var(--accent-primary);">
+          <path d="M8 6L4 12L8 18M16 6L20 12L16 18M14 4L10 20" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" />
         </svg>
         <label style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">Quirk Circuit JSON:</label>
       </div>
-      <textarea class="glass-input code-font" [(ngModel)]="quirkCodeText" (ngModelChange)="onQuirkCodeChange($event)" rows="12" style="resize: vertical; line-height: 1.5;" placeholder='e.g. {"cols": [["H"], ["•", "X"]]}'></textarea>
+      <textarea class="glass-input code-font" [(ngModel)]="quirkCodeText" (ngModelChange)="onQuirkCodeChange($event)"
+        rows="12" style="resize: vertical; line-height: 1.5;"
+        placeholder='e.g. {"cols": [["H"], ["•", "X"]]}'></textarea>
     </div>
 
     <div class="button-row" style="display: flex; gap: 12px; margin-bottom: 8px;">
       <button class="btn-flat" (click)="visualizeCircuit()" [disabled]="!quirkCodeText.trim()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; display: inline-block; vertical-align: middle;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+          style="margin-right: 6px; display: inline-block; vertical-align: middle;">
           <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" stroke-width="2" />
-          <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke="currentColor" stroke-width="2" />
+          <path
+            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+            stroke="currentColor" stroke-width="2" />
         </svg>
         Visualize in Quirk
         <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
@@ -115,7 +120,8 @@
 
   <!-- Danger Zone -->
   <div class="glass-panel danger-zone-panel">
-    <h3 style="margin-top: 0; color: var(--accent-danger); display: flex; align-items: center; gap: 8px; font-family: 'Fira Sans', sans-serif;">
+    <h3
+      style="margin-top: 0; color: var(--accent-danger); display: flex; align-items: center; gap: 8px; font-family: 'Fira Sans', sans-serif;">
       <i class="fas fa-exclamation-triangle"></i> Danger Zone
     </h3>
     <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
